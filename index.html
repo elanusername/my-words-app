@@ -5,316 +5,296 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Words App</title>
 <style>
-body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; }
-button { margin: 5px; padding: 10px 15px; font-size: 16px; cursor: pointer; }
-#wordDisplay { font-size: 24px; margin-top: 20px; display: flex; align-items: center; justify-content: space-between; }
-#progress { font-size: 14px; color: #555; }
-.option-btn { background-color: #e0e0e0; margin: 5px 0; display: block; width: 100%; text-align: left; }
-#translation { margin-top: 10px; font-size: 20px; color: #007700; }
-#optionsContainer button { background-color: #ffe0b2; } /* אופציות רב-ברירה בצבע אחר */
-footer { font-size: 12px; color: #777; text-align: center; margin-top: 30px; }
-.overlay, .popup { display: none; position: fixed; top: 0; left:0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
-.overlay-content, .popup-content { background: white; padding: 20px; border-radius: 10px; width: 90%; max-width: 400px; }
-input { width: 100%; padding: 8px; margin: 5px 0; font-size: 16px; }
-.close-btn { float: right; cursor: pointer; font-weight: bold; }
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0; padding: 0;
+        background-color: #f7f7f7;
+        color: #333;
+    }
+    header {
+        background-color: #4a90e2;
+        color: #fff;
+        padding: 15px;
+        text-align: center;
+        font-size: 1.5em;
+    }
+    .main-menu, .add-word, .practice, .load-csv, .export-csv, .edit-word {
+        display: none;
+        padding: 20px;
+    }
+    button {
+        padding: 10px 15px;
+        margin: 5px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+    .primary { background-color: #4a90e2; color: #fff; }
+    .secondary { background-color: #50e3c2; color: #fff; }
+    .option { background-color: #ffe0b2; color: #333; }
+    .danger { background-color: #e94b35; color: #fff; }
+    input[type="text"] { padding: 8px; width: 80%; margin-bottom: 10px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background-color: #f2f2f2; }
+    .word-row { display: flex; align-items: center; justify-content: space-between; margin: 10px 0; }
+    .footer {
+        text-align: center;
+        font-size: 0.7em;
+        padding: 10px;
+        color: #666;
+        background-color: #eee;
+        position: fixed;
+        bottom: 0; width: 100%;
+    }
 </style>
 </head>
 <body>
 
-<h1>My Words App</h1>
+<header>My Words App</header>
 
-<div id="mainMenu">
-    <button id="addWordBtn">הוספת מילה</button>
-    <button id="practiceBtn">תרגול</button>
-    <button id="loadCSVBtn">טעינת רשימה</button>
-    <button id="exportCSVBtn">ייצוא רשימת מילים</button>
+<!-- Main Menu -->
+<div class="main-menu">
+    <button class="primary" onclick="showSection('add-word')">Add Word</button>
+    <button class="primary" onclick="showSection('practice')">Practice Words</button>
+    <button class="secondary" onclick="showSection('load-csv')">Load CSV</button>
+    <button class="secondary" onclick="exportCSV()">Export CSV</button>
 </div>
 
-<!-- הוספת מילה -->
-<div id="addWordSection" style="display:none;">
-    <h2>הוספת מילה</h2>
-    <label>English:</label>
-    <input type="text" id="newWord">
-    <button id="translateBtn">תרגם online</button>
-    <label>Hebrew:</label>
-    <input type="text" id="newTranslation">
-    <button id="saveWordBtn">שמור</button>
-    <button onclick="showMainMenu()">חזרה</button>
-    <p id="addWordMsg"></p>
+<!-- Add Word Section -->
+<div class="add-word">
+    <h2>Add Word</h2>
+    <input type="text" id="new-word" placeholder="Enter English word">
+    <button class="primary" onclick="translateWord()">Translate Online</button>
+    <input type="text" id="translated-word" placeholder="Hebrew Translation">
+    <button class="secondary" onclick="saveWord()">Save</button>
+    <button class="option" onclick="showSection('main-menu')">Back</button>
+    <div id="add-word-msg"></div>
 </div>
 
-<!-- תרגול -->
-<div id="practiceSection" style="display:none;">
-    <div id="practiceOptions">
-        <p>בחר מספר מילים לתרגול:</p>
-        <button data-count="30">30 מילים אחרונות</button>
-        <button data-count="50">50 מילים אחרונות</button>
-        <button data-count="100">100 מילים אחרונות</button>
-        <button data-count="200">200 מילים אחרונות</button>
-        <button data-count="all">כל המילים</button>
-        <button onclick="showMainMenu()">ביטול</button>
+<!-- Practice Section -->
+<div class="practice">
+    <h2>Practice Words</h2>
+    <label for="practice-count">Select number of words:</label>
+    <select id="practice-count">
+        <option value="30">Last 30</option>
+        <option value="50">Last 50</option>
+        <option value="100">Last 100</option>
+        <option value="200">Last 200</option>
+        <option value="all">All Words</option>
+    </select>
+    <button class="primary" onclick="startPractice()">Start Practice</button>
+    <button class="option" onclick="showSection('main-menu')">Back</button>
+</div>
+
+<!-- Word Display / Practice Mode -->
+<div class="practice-mode" style="display:none;">
+    <div class="word-row">
+        <span id="practice-word" style="font-weight:bold;"></span>
+        <button class="secondary" onclick="speakWord()" id="speak-btn">🔊</button>
+        <span id="progress"></span>
     </div>
-
-    <div id="practiceWordArea" style="display:none;">
-        <div id="wordDisplay">
-            <span id="currentWord">Word</span>
-            <span id="progress">0/0</span>
-            <button id="speakBtn">🔊</button>
-        </div>
-        <div id="translation"></div>
-        <div id="practiceBtns">
-            <button id="showTranslationBtn">הצג תרגום</button>
-            <button id="showOptionsBtn">הצג אפשרויות</button>
-            <button id="nextWordBtn">למילה הבאה</button>
-            <button id="hideWordBtn">הסתר</button>
-            <button id="editWordBtn">ערוך מילה</button>
-            <button id="deleteWordBtn">מחק מילה</button>
-        </div>
-        <div id="optionsContainer"></div>
+    <div id="practice-buttons">
+        <button class="primary" onclick="nextWord('known')">Next Word</button>
+        <button class="option" onclick="showTranslation()">Show Translation</button>
+        <button class="option" onclick="showOptions()">Show Options</button>
+        <button class="danger" onclick="hideWord()">Hide</button>
+        <button class="secondary" onclick="editCurrentWord()">Edit Word</button>
+        <button class="danger" onclick="deleteCurrentWord()">Delete</button>
     </div>
+    <div id="options-container" style="margin-top:10px;"></div>
+    <div id="practice-msg"></div>
 </div>
 
-<!-- Overlay לעריכה -->
-<div class="overlay" id="editOverlay">
-    <div class="overlay-content">
-        <span class="close-btn" onclick="closeEditOverlay()">×</span>
-        <h3>עריכת מילה</h3>
-        <label>English:</label>
-        <input type="text" id="editEnglish">
-        <label>Hebrew:</label>
-        <input type="text" id="editHebrew">
-        <button onclick="saveEditWord()">שמור</button>
-        <button onclick="closeEditOverlay()">ביטול</button>
-    </div>
+<!-- Load CSV -->
+<div class="load-csv">
+    <h2>Load CSV File</h2>
+    <input type="file" id="csv-file">
+    <button class="primary" onclick="loadCSV()">Load CSV</button>
+    <button class="option" onclick="showSection('main-menu')">Back</button>
+    <div id="load-msg"></div>
 </div>
 
-<!-- Popup למחיקה -->
-<div class="popup" id="deletePopup">
-    <div class="popup-content">
-        <p>Are you sure you want to delete this word?</p>
-        <button onclick="confirmDeleteWord()">Delete Word</button>
-        <button onclick="closeDeletePopup()">Back</button>
-    </div>
+<div class="footer">
+    This App was designed by Eli Anenburg and His AI friend
 </div>
-
-<input type="file" id="csvFileInput" style="display:none">
-
-<footer>
-This App was designed by Eli Anenburg and His AI friend
-</footer>
 
 <script>
-const STORAGE_KEY = 'myWordsAppWords';
-let words = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+let words = []; // {english, hebrew, hidden, dateCreated}
 let practiceList = [];
-let currentIndex = 0;
-let currentWordObj = null;
-let correctCount = 0;
+let currentWordIndex = 0;
+let optionsVisible = false;
 
-// --- Main Menu ---
-document.getElementById('addWordBtn').onclick = () => showSection('addWordSection');
-document.getElementById('practiceBtn').onclick = () => showSection('practiceSection');
-document.getElementById('loadCSVBtn').onclick = () => document.getElementById('csvFileInput').click();
-document.getElementById('exportCSVBtn').onclick = exportCSV;
-
-// --- Show/Hide Sections ---
-function showSection(sectionId) {
-    document.getElementById('mainMenu').style.display = 'none';
-    document.getElementById('addWordSection').style.display = 'none';
-    document.getElementById('practiceSection').style.display = 'none';
-    document.getElementById(sectionId).style.display = 'block';
+// Show section
+function showSection(section) {
+    document.querySelectorAll('.main-menu, .add-word, .practice, .practice-mode, .load-csv').forEach(s => s.style.display='none');
+    document.querySelector('.'+section).style.display='block';
 }
-function showMainMenu() { document.getElementById('mainMenu').style.display = 'block'; showSection(''); }
 
-// --- Add Word ---
-document.getElementById('translateBtn').onclick = async () => {
-    const word = document.getElementById('newWord').value.trim();
-    if(!word) { alert('Enter an English word'); return; }
-    document.getElementById('newTranslation').value = word + "_he"; // Demo translation
+// Add word
+function translateWord() {
+    let word = document.getElementById('new-word').value.trim();
+    if(!word) { alert("Enter word"); return; }
+    // Simulate translation online
+    document.getElementById('translated-word').value = word + " (Hebrew)";
 }
-document.getElementById('saveWordBtn').onclick = () => {
-    const eng = document.getElementById('newWord').value.trim();
-    const heb = document.getElementById('newTranslation').value.trim();
-    if(!eng || !heb) { document.getElementById('addWordMsg').innerText = 'יש להזין את כל השדות'; return; }
-    if(!words.some(w=>w.english===eng)){
-        words.push({english:eng, hebrew:heb, isHidden:false, dateCreated: new Date().toISOString(), score:0});
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(words));
-        document.getElementById('addWordMsg').innerText = 'נשמר בהצלחה!';
-        document.getElementById('newWord').value=''; document.getElementById('newTranslation').value='';
-    } else {
-        document.getElementById('addWordMsg').innerText = 'המילה כבר קיימת';
+function saveWord() {
+    let english = document.getElementById('new-word').value.trim();
+    let hebrew = document.getElementById('translated-word').value.trim();
+    if(!english) { alert("Enter English word"); return; }
+    words.push({english, hebrew, hidden:false, dateCreated: new Date().toISOString()});
+    document.getElementById('add-word-msg').innerText = "Word saved!";
+    document.getElementById('new-word').value = '';
+    document.getElementById('translated-word').value = '';
+}
+
+// Practice
+function startPractice() {
+    let select = document.getElementById('practice-count').value;
+    let maxWords = select==='all'? words.length : parseInt(select);
+    maxWords = Math.min(maxWords, words.length);
+    practiceList = words.filter(w=>!w.hidden).slice(-maxWords);
+    currentWordIndex=0;
+    showSection('practice-mode');
+    displayWord();
+}
+
+function displayWord() {
+    if(currentWordIndex >= practiceList.length){
+        document.getElementById('practice-word').innerText = 'Practice Complete!';
+        document.getElementById('practice-buttons').style.display='none';
+        document.getElementById('options-container').innerHTML='';
+        return;
     }
+    let w = practiceList[currentWordIndex];
+    document.getElementById('practice-word').innerText = w.english;
+    document.getElementById('progress').innerText = (currentWordIndex+1) + '/' + practiceList.length;
+    document.getElementById('options-container').innerHTML='';
+    optionsVisible=false;
+    enablePracticeButtons(true);
 }
 
-// --- Practice Selection ---
-document.querySelectorAll('#practiceOptions button[data-count]').forEach(btn=>{
-    btn.onclick = () => startPractice(btn.getAttribute('data-count'));
-});
-function startPractice(count) {
-    const availableWords = words.filter(w=>!w.isHidden);
-    if(availableWords.length===0){ alert('אין מילים זמינות לתרגול'); showMainMenu(); return; }
-    let n;
-    if(count==='all') n = availableWords.length;
-    else n = Math.min(parseInt(count), availableWords.length);
-    if(n<parseInt(count) && count!=='all') alert(`נמצאו רק ${availableWords.length} מילים זמינות`);
-    
-    practiceList = [...availableWords].sort((a,b)=>a.score - b.score).slice(0,n);
-    currentIndex = 0;
-    correctCount = 0;
-    showSection('practiceSection');
-    document.getElementById('practiceOptions').style.display='none';
-    document.getElementById('practiceWordArea').style.display='block';
-    showNextWord();
-}
-
-// --- Show Word ---
-function showNextWord() {
-    if(currentIndex>=practiceList.length){ 
-        alert(`סיום התרגול! הצלחת ב-${correctCount}/${practiceList.length} מילים.`);
-        showMainMenu(); 
-        return; 
-    }
-    currentWordObj = practiceList[currentIndex];
-    document.getElementById('currentWord').innerText = currentWordObj.english;
-    document.getElementById('translation').innerText = '';
-    document.getElementById('progress').innerText = `${currentIndex+1}/${practiceList.length}`;
-    document.getElementById('optionsContainer').innerHTML='';
-
-    document.getElementById('showTranslationBtn').disabled=false;
-    document.getElementById('showOptionsBtn').disabled=false;
-    document.getElementById('nextWordBtn').disabled=false;
-}
-
-// --- Practice Buttons ---
-document.getElementById('showTranslationBtn').onclick = () => {
-    document.getElementById('translation').innerText = currentWordObj.hebrew;
-    currentWordObj.score++; 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(words));
-    correctCount++;
-}
-
-// --- Options Multiple Choice ---
-document.getElementById('showOptionsBtn').onclick = () => {
-    document.getElementById('showTranslationBtn').disabled=true;
-    document.getElementById('nextWordBtn').disabled=true;
-    document.getElementById('optionsContainer').innerHTML='';
-
-    // בחר שלוש אפשרויות נוספות אקראיות + נכונה
-    const options = [currentWordObj.hebrew];
-    const otherWords = words.filter(w=>w.english!==currentWordObj.english);
-    while(options.length<4 && otherWords.length>0){
-        const idx = Math.floor(Math.random()*otherWords.length);
-        const val = otherWords[idx].hebrew;
-        if(!options.includes(val)) options.push(val);
-    }
-    shuffleArray(options);
-
-    options.forEach(opt=>{
-        const btn = document.createElement('button');
-        btn.innerText = opt;
-        btn.className = 'option-btn';
-        btn.onclick = () => checkOption(opt);
-        document.getElementById('optionsContainer').appendChild(btn);
+function enablePracticeButtons(enable) {
+    document.querySelectorAll('#practice-buttons button').forEach(b=>{
+        if(b.id==='speak-btn') return;
+        b.disabled=!enable;
     });
 }
 
-function checkOption(selected){
-    const container = document.getElementById('optionsContainer');
-    Array.from(container.children).forEach(b=>b.disabled=true);
-    const translationDiv = document.getElementById('translation');
-    if(selected === currentWordObj.hebrew){
-        translationDiv.innerText = '✅ נכונה!';
-        currentWordObj.score++;
-        correctCount++;
-    } else {
-        translationDiv.innerText = `❌ שגויה! התשובה הנכונה: ${currentWordObj.hebrew}`;
+function nextWord(type){
+    if(type==='known'){
+        // mark success logic
+        currentWordIndex++;
+        displayWord();
     }
-    document.getElementById('nextWordBtn').disabled=false;
 }
 
-// --- Next Word Button ---
-document.getElementById('nextWordBtn').onclick = () => {
-    currentIndex++; showNextWord();
+// Show translation
+function showTranslation(){
+    let w = practiceList[currentWordIndex];
+    alert("Translation: " + w.hebrew);
 }
 
-// --- Hide Word ---
-document.getElementById('hideWordBtn').onclick = () => { 
-    currentWordObj.isHidden=true; 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(words)); 
-    currentIndex++; showNextWord(); 
+// Show options (multiple choice)
+function showOptions(){
+    let w = practiceList[currentWordIndex];
+    optionsVisible=true;
+    enablePracticeButtons(false);
+    let container = document.getElementById('options-container');
+    container.innerHTML='';
+    let choices = [w.hebrew];
+    while(choices.length<4){
+        let rand = words[Math.floor(Math.random()*words.length)].hebrew;
+        if(!choices.includes(rand)) choices.push(rand);
+    }
+    choices = choices.sort(()=>Math.random()-0.5);
+    choices.forEach(c=>{
+        let btn = document.createElement('button');
+        btn.className='option';
+        btn.innerText=c;
+        btn.onclick = ()=>{
+            if(c===w.hebrew) alert('Correct!');
+            else alert('Wrong! Correct: '+w.hebrew);
+            enablePracticeButtons(true);
+        };
+        container.appendChild(btn);
+    });
 }
 
-// --- Edit & Delete ---
-document.getElementById('editWordBtn').onclick = () => {
-    document.getElementById('editEnglish').value = currentWordObj.english;
-    document.getElementById('editHebrew').value = currentWordObj.hebrew;
-    document.getElementById('editOverlay').style.display='flex';
-}
-function closeEditOverlay(){ document.getElementById('editOverlay').style.display='none'; }
-function saveEditWord(){
-    currentWordObj.english = document.getElementById('editEnglish').value.trim();
-    currentWordObj.hebrew = document.getElementById('editHebrew').value.trim();
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(words));
-    closeEditOverlay();
-    showNextWord();
+// Hide word
+function hideWord(){
+    let w = practiceList[currentWordIndex];
+    w.hidden=true;
+    currentWordIndex++;
+    displayWord();
 }
 
-document.getElementById('deleteWordBtn').onclick = () => { document.getElementById('deletePopup').style.display='flex'; }
-function closeDeletePopup(){ document.getElementById('deletePopup').style.display='none'; }
-function confirmDeleteWord(){
-    const idx = words.indexOf(currentWordObj);
-    if(idx>-1){ words.splice(idx,1); localStorage.setItem(STORAGE_KEY, JSON.stringify(words)); }
-    closeDeletePopup();
-    if(currentIndex>=practiceList.length-1) showMainMenu();
-    else showNextWord();
+// Edit current word
+function editCurrentWord(){
+    let w = practiceList[currentWordIndex];
+    let eng = prompt("Edit English", w.english);
+    let heb = prompt("Edit Hebrew", w.hebrew);
+    if(eng!==null && heb!==null){
+        w.english = eng;
+        w.hebrew = heb;
+        words.find(word=>word===w).english=eng;
+        words.find(word=>word===w).hebrew=heb;
+        displayWord();
+    }
 }
 
-// --- Speak Word ---
-document.getElementById('speakBtn').onclick = () => {
-    const utter = new SpeechSynthesisUtterance(currentWordObj.english);
+// Delete current word
+function deleteCurrentWord(){
+    let w = practiceList[currentWordIndex];
+    if(confirm("Delete Word?")){
+        words = words.filter(word=>word!==w);
+        practiceList = practiceList.filter(word=>word!==w);
+        displayWord();
+    }
+}
+
+// Speak word
+function speakWord(){
+    let w = practiceList[currentWordIndex];
+    let utter = new SpeechSynthesisUtterance(w.english);
     speechSynthesis.speak(utter);
 }
 
-// --- Load CSV ---
-document.getElementById('csvFileInput').addEventListener('change', function(e){
-    const file = e.target.files[0];
+// CSV Load
+function loadCSV(){
+    let file = document.getElementById('csv-file').files[0];
     if(!file) return;
-    const reader = new FileReader();
+    let reader = new FileReader();
     reader.onload = function(e){
-        const lines = e.target.result.split('\n');
-        lines.forEach(line=>{
-            const [eng, heb]=line.trim().split(',');
-            if(eng && heb && !words.some(w=>w.english===eng)){
-                words.push({english:eng, hebrew:heb, isHidden:false, dateCreated: new Date().toISOString(), score:0});
+        let lines = e.target.result.split('\n');
+        lines.forEach((line,i)=>{
+            if(i===0) return; // skip header
+            let [english, hebrew] = line.split(',');
+            if(english && !words.find(w=>w.english===english.trim())){
+                words.push({english: english.trim(), hebrew: hebrew? hebrew.trim():'', hidden:false, dateCreated: new Date().toISOString()});
             }
         });
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(words));
-        alert('רשימת מילים נטענה בהצלחה!');
-    }
+        document.getElementById('load-msg').innerText = 'CSV Loaded!';
+    };
     reader.readAsText(file);
-});
-
-// --- Export CSV ---
-function exportCSV(){
-    if(words.length===0){ alert('אין מילים לייצוא'); return; }
-    const header = ['English','Hebrew','IsHidden','DateCreated','Score'];
-    const csvRows = [header.join(',')];
-    words.forEach(w=>{
-        csvRows.push([w.english,w.hebrew,w.isHidden,w.dateCreated,w.score].join(','));
-    });
-    const csvContent = "data:text/csv;charset=utf-8," + csvRows.join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    const dateStr = new Date().toISOString().split('T')[0];
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `MyWordsBackup_${dateStr}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
 }
 
-// --- Helper ---
-function shuffleArray(array){ for(let i=array.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [array[i],array[j]]=[array[j],array[i]]; } }
+// CSV Export
+function exportCSV(){
+    let csv = 'English,Hewbrew,Is Hidden,Date Created\n';
+    words.forEach(w=>{
+        csv += `"${w.english}","${w.hebrew}",${w.hidden},"${w.dateCreated}"\n`;
+    });
+    let blob = new Blob([csv], {type: 'text/csv'});
+    let url = URL.createObjectURL(blob);
+    let a = document.createElement('a');
+    let date = new Date().toISOString().slice(0,10);
+    a.download = `MyWords_${date}.csv`;
+    a.href = url;
+    a.click();
+}
+
+showSection('main-menu');
 </script>
 
 </body>
