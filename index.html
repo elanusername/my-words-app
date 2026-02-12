@@ -17,14 +17,14 @@ button { width:100%; padding:14px; margin:8px 0; font-size:18px; border:none; bo
 .correct { background:#4caf50; color:white;}
 .wrong { background:#f44336; color:white;}
 .hidden { display:none; }
-.word-box { text-align:center; margin:30px 0; position:relative; }
+.word-box { text-align:center; margin:30px 0; }
 .english-word { font-size:32px; font-weight:bold; display:inline-block; }
 .hebrew-word { font-size:26px; margin-top:10px; direction:rtl; color:#2c3e50; }
-.progress { text-align:center; font-size:14px; color:#777; margin-bottom:10px;}
 .choice-btn { background:#ffcc80; color:#3e2723; border:2px solid #fb8c00; border-radius:14px; margin:6px 0; font-weight:bold; font-size:18px; }
 .choice-btn.correct { background:#4caf50; color:white; border:none;}
 .choice-btn.wrong { background:#f44336; color:white; border:none;}
-.speech-btn { position:absolute; right:-50px; top:0; background:#4a90e2; color:white; border-radius:50%; width:40px; height:40px; font-size:20px; line-height:40px; cursor:pointer; }
+.progress-container { display:flex; justify-content:space-between; align-items:center; font-size:14px; color:#777; margin-bottom:10px; }
+.speech-btn { background:#4a90e2; color:white; border-radius:8px; width:40px; height:32px; font-size:20px; line-height:32px; text-align:center; cursor:pointer; border:none; }
 </style>
 </head>
 <body>
@@ -36,6 +36,7 @@ button { width:100%; padding:14px; margin:8px 0; font-size:18px; border:none; bo
   <button class="primary" onclick="showScreen('add')">➕ הוספת מילה</button>
   <button class="primary" onclick="startPractice()">🎯 תרגול</button>
   <button class="primary" onclick="loadCSV()">📂 טעינת רשימה</button>
+  <button class="primary" onclick="exportCSV()">📤 ייצוא רשימת מילים</button>
   <input type="file" id="csvFileInput" class="hidden" accept=".csv" onchange="handleCSV(event)">
 </div>
 
@@ -54,24 +55,23 @@ button { width:100%; padding:14px; margin:8px 0; font-size:18px; border:none; bo
 <!-- תרגול -->
 <div id="practice" class="screen">
   <div class="card">
-    <div class="progress" id="progress"></div>
+    <div class="progress-container">
+      <div id="progress">0/0</div>
+      <div class="speech-btn" onclick="speakWord()">🔊</div>
+    </div>
+
     <div class="word-box">
       <div class="english-word" id="currentWord"></div>
       <div class="hebrew-word hidden" id="translation"></div>
-      <div class="speech-btn" onclick="speakWord()">🔊</div>
     </div>
 
     <div id="choices" class="hidden"></div>
 
-    <!-- גרסה 1: למילה הבאה רגילה -->
     <button id="nextBtnNormal" class="primary" onclick="nextWordNormal()">למילה הבאה</button>
-    <!-- גרסה 2: למילה הבאה אחרי רב־ברירה -->
     <button id="nextBtnChoice" class="primary hidden" onclick="nextWordAfterChoice()">למילה הבאה</button>
-
     <button id="showTransBtn" class="secondary" onclick="showTranslation()">הצג תרגום</button>
     <button id="showChoicesBtn" class="secondary" onclick="showChoices()">הצג אפשרויות</button>
     <button class="secondary" onclick="hideCurrentWord()">הסתר</button>
-
     <button class="back" onclick="showScreen('home')">⬅ חזרה</button>
   </div>
 </div>
@@ -98,7 +98,14 @@ async function translateOnline(){
 // שמירת מילה
 function saveWord(){
   if(!englishInput.value || !hebrewInput.value) return;
-  words.push({english:englishInput.value.trim(), hebrew:hebrewInput.value.trim(), hidden:false, score:0});
+  const newWord = {
+    english:englishInput.value.trim(),
+    hebrew:hebrewInput.value.trim(),
+    hidden:false,
+    score:0,
+    dateCreated: new Date().toISOString()
+  };
+  words.push(newWord);
   localStorage.setItem("words", JSON.stringify(words));
   englishInput.value=""; hebrewInput.value="";
   alert("נשמר");
@@ -119,7 +126,7 @@ function handleCSV(event) {
       const [eng,heb] = line.trim().split(',');
       if(!eng||!heb) return;
       if(!words.some(w=>w.english.toLowerCase()===eng.toLowerCase())){
-        words.push({english:eng.trim(), hebrew:heb.trim(), hidden:false, score:0});
+        words.push({english:eng.trim(), hebrew:heb.trim(), hidden:false, score:0, dateCreated:new Date().toISOString()});
         addedCount++;
       }
     });
@@ -127,6 +134,23 @@ function handleCSV(event) {
     alert(`הוספו ${addedCount} מילים חדשות`);
   }
   reader.readAsText(file);
+}
+
+// ייצוא CSV
+function exportCSV(){
+  if(!words.length){ alert("אין מילים לייצוא"); return; }
+  let csvContent = "data:text/csv;charset=utf-8,";
+  csvContent += "English word,Hebrew Translation,Is Hidden,Date Created\n";
+  words.forEach(w=>{
+    csvContent += `${w.english},${w.hebrew},${w.hidden},${w.dateCreated}\n`;
+  });
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", "my_words_list.csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
 
 // תרגול עם אלגוריתם חדש/ישן (3:1)
