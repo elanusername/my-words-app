@@ -2,328 +2,316 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>My Words App</title>
 
 <style>
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: #f5f7fa;
-  margin: 0;
-  padding: 0;
+  font-family: Arial, sans-serif;
+  background:#f1f5f9;
+  margin:0;
 }
-
-header {
-  text-align: center;
-  padding: 16px;
-  font-size: 22px;
-  font-weight: bold;
-}
-
-.container {
-  max-width: 480px;
-  margin: auto;
-  padding: 16px;
-}
-
-button {
-  width: 60%;
-  padding: 14px;
-  margin: 10px auto;
-  display: block;
-  font-size: 16px;
-  border-radius: 8px;
-  border: none;
-  background: #2563eb;
-  color: white;
-}
-
-button.secondary {
-  background: #64748b;
-}
-
-button.danger {
-  background: #dc2626;
-}
-
-button:disabled {
-  background: #94a3b8;
-}
-
-.card {
-  background: white;
-  border-radius: 10px;
-  padding: 16px;
-  margin-bottom: 16px;
-}
-
-.word {
-  font-size: 32px;
-  text-align: center;
-  margin: 12px 0;
-}
-
-.translation {
-  font-size: 22px;
-  text-align: center;
-  color: #2563eb;
-  margin-top: 10px;
-}
-
-.top-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.option {
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  padding: 10px;
-  margin: 8px 0;
-  text-align: center;
-}
-
-.option.correct { background: #bbf7d0; }
-.option.wrong { background: #fecaca; }
-
-footer {
-  text-align: center;
-  font-size: 12px;
-  color: #475569;
-  margin: 20px 0;
-}
+.screen { display:none; max-width:600px; margin:auto; padding:20px; }
+.screen.active { display:block; }
+h1 { text-align:center; }
+button { padding:14px; font-size:16px; border-radius:8px; border:none; cursor:pointer; margin:6px 0; }
+.primary { background:#2563eb; color:#fff; }
+.secondary { background:#e5e7eb; }
+.danger { background:#dc2626; color:#fff; }
+.main-buttons button { width:60%; display:block; margin:10px auto; }
+.card { background:#fff; padding:20px; border-radius:12px; }
+.word { font-size:34px; text-align:center; margin:20px 0 10px; }
+.translation { font-size:22px; text-align:center; color:#2563eb; margin-bottom:10px; }
+.top-row { display:flex; justify-content:space-between; align-items:center; }
+.options .option { padding:12px; border-radius:8px; background:#e5e7eb; margin:6px 0; cursor:pointer; }
+.option.correct { background:#bbf7d0; }
+.option.wrong { background:#fecaca; }
+.vx-buttons { text-align:center; margin:10px 0; }
+.vx-buttons button { width:80px; margin:0 10px; font-weight:bold; }
+.footer { text-align:center; font-size:12px; margin-top:40px; color:#475569; }
 </style>
 </head>
 
 <body>
 
-<header>My Words App</header>
+<!-- MAIN -->
+<div class="screen active" id="main">
+<h1>My Words App</h1>
+<div class="main-buttons">
+  <button class="primary" onclick="go('add')">Add Word</button>
+  <button class="primary" onclick="go('practiceSetup')">Practice Words</button>
+  <button class="primary" onclick="loadCSV()">Load List</button>
+  <button class="primary" onclick="exportCSV()">Export Word List</button>
+  <button class="danger" onclick="resetDatabase()">Reset Word Database</button>
+</div>
+<p style="text-align:center">
+  Number of words in database: <b id="count"></b>
+</p>
+<div class="footer">
+  This App was designed by Eli Anenburg and His AI friend
+</div>
+</div>
 
-<div class="container" id="app"></div>
+<!-- ADD WORD -->
+<div class="screen" id="add">
+<h1>Add Word</h1>
+<div class="card">
+  <input id="eng" placeholder="English" style="width:100%;padding:10px"><br><br>
+  <input id="heb" placeholder="Hebrew" style="width:100%;padding:10px"><br><br>
+  <button class="primary" onclick="saveWord()">Save</button>
+  <button class="secondary" onclick="go('main')">Back</button>
+</div>
+</div>
 
-<footer>
-This App was designed by Eli Anenburg and His AI friend
-</footer>
+<!-- PRACTICE SETUP -->
+<div class="screen" id="practiceSetup">
+<h1>Practice Setup</h1>
+<div class="card">
+<select id="limit" style="width:100%;padding:10px">
+  <option value="30">30 words</option>
+  <option value="50">50 words</option>
+  <option value="100">100 words</option>
+  <option value="200">200 words</option>
+  <option value="all">All words</option>
+</select><br><br>
+<label>
+  <input type="checkbox" id="resetPractice">
+  Reset Practice
+</label><br><br>
+<button class="primary" onclick="startPractice()">Start Practice</button>
+<button class="secondary" onclick="go('main')">Back</button>
+</div>
+</div>
+
+<!-- PRACTICE -->
+<div class="screen" id="practice">
+<h1>Practice</h1>
+<div class="card">
+
+<div class="top-row">
+  <div id="progress"></div>
+  <button onclick="speakWord()">🔊</button>
+</div>
+
+<div class="word" id="word"></div>
+<div class="translation" id="translation"></div>
+
+<div class="options" id="options"></div>
+
+<div class="vx-buttons" id="vxButtons" style="display:none;">
+  <button id="btnV" class="primary" onclick="markV()">V</button>
+  <button id="btnX" class="danger" onclick="markX()">X</button>
+</div>
+
+<button class="secondary" id="showTranslationBtn" onclick="showTranslation()">Show Translation</button>
+<button class="secondary" id="showOptionsBtn" onclick="showOptions()">Show Options</button>
+<button class="primary" id="nextBtn" onclick="nextWord()">Next Word</button>
+
+<hr>
+
+<button class="secondary" onclick="editWord()">Edit Word</button>
+<button class="secondary" onclick="hideWord()">Hide</button>
+<button class="danger" onclick="deleteWord()">Delete</button>
+
+<button class="secondary" onclick="finishPractice()">Finish Practice</button>
+
+</div>
+</div>
 
 <script>
-/* ========= Storage ========= */
-const DB_KEY = "my_words_db";
-const PRACTICE_KEY = "practice_state";
-
-function loadWords() {
-  return JSON.parse(localStorage.getItem(DB_KEY) || "[]");
-}
-function saveWords(words) {
-  localStorage.setItem(DB_KEY, JSON.stringify(words));
-}
-
-/* ========= State ========= */
-let app = document.getElementById("app");
-let words = loadWords();
+let words = JSON.parse(localStorage.words || "[]");
 let practiceQueue = [];
-let practiceIndex = 0;
-let showTranslation = false;
-let showOptions = false;
+let index = 0;
+let score = 0;
+let optionLocked = false;
+let waitVX = false;
 
-/* ========= Screens ========= */
+function save() {
+  localStorage.words = JSON.stringify(words);
+  count.innerText = words.length;
+}
+save();
 
-function mainMenu() {
-  app.innerHTML = `
-    <div class="card">
-      <button onclick="addWordScreen()">Add Word</button>
-      <button onclick="practiceSetup()">Practice Words</button>
-      <button onclick="loadCSV()">Load List</button>
-      <button onclick="exportCSV()">Export Words</button>
-      <button class="danger" onclick="resetDatabase()">Reset Word Database</button>
-      <p style="text-align:center;margin-top:12px">
-        Number of words in database: <b>${words.filter(w=>!w.hidden).length}</b>
-      </p>
-    </div>
-  `;
+function go(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
 }
 
-/* ========= Add Word ========= */
-function addWordScreen() {
-  app.innerHTML = `
-    <div class="card">
-      <input id="en" placeholder="English word" style="width:100%;padding:10px" />
-      <input id="he" placeholder="Hebrew translation" style="width:100%;padding:10px;margin-top:8px" />
-      <button onclick="saveWord()">Save</button>
-      <button class="secondary" onclick="mainMenu()">Back</button>
-    </div>
-  `;
-}
-
-function saveWord() {
-  const en = document.getElementById("en").value.trim();
-  const he = document.getElementById("he").value.trim();
-  if (!en || !he) return alert("Missing data");
-  words.push({
-    en, he,
+function saveWord(){
+  if(!eng.value || !heb.value) return alert("Missing value");
+  words.unshift({
+    e: eng.value,
+    h: heb.value,
     hidden:false,
-    createdAt:Date.now(),
-    wasShown:false
+    shown:false,
+    created:new Date().toISOString()
   });
-  saveWords(words);
-  mainMenu();
+  save();
+  eng.value=heb.value="";
+  go('main');
 }
 
-/* ========= Practice Setup ========= */
-function practiceSetup() {
-  app.innerHTML = `
-    <div class="card">
-      <h3>Select Practice Size</h3>
-      <button onclick="startPractice(30)">30</button>
-      <button onclick="startPractice(50)">50</button>
-      <button onclick="startPractice(100)">100</button>
-      <button onclick="startPractice(200)">200</button>
-      <button onclick="startPractice('ALL')">All</button>
-      <label>
-        <input type="checkbox" id="resetFlag" /> Reset Practice
-      </label>
-      <button class="secondary" onclick="mainMenu()">Back</button>
-    </div>
-  `;
-}
+function startPractice(){
+  if(resetPractice.checked) words.forEach(w=>w.shown=false);
 
-/* ========= Practice Logic ========= */
-function startPractice(size) {
-  const reset = document.getElementById("resetFlag").checked;
-  if (reset) {
-    words.forEach(w=>w.wasShown=false);
-    saveWords(words);
+  let pool = words.filter(w=>!w.hidden && !w.shown);
+  if(pool.length===0){
+    alert("All words were already practiced. Resetting automatically.");
+    words.forEach(w=>w.shown=false);
+    pool = words.filter(w=>!w.hidden);
   }
 
-  let available = words.filter(w=>!w.hidden && !w.wasShown)
-    .sort((a,b)=>b.createdAt-a.createdAt);
+  // Prioritize LIFO (newest first)
+  pool.sort((a,b)=>new Date(b.created)-new Date(a.created));
 
-  if (available.length === 0) {
-    alert("Practice Complete – All words were covered");
-    return mainMenu();
-  }
-
-  if (size !== 'ALL') available = available.slice(0, size);
-
-  practiceQueue = available;
-  practiceIndex = 0;
-  showWord();
+  let lim = limit.value==="all" ? pool.length : Math.min(+limit.value, pool.length);
+  practiceQueue = pool.slice(0, lim);
+  index=0; score=0;
+  loadWord();
+  go('practice');
 }
 
-function showWord() {
-  const w = practiceQueue[practiceIndex];
-  showTranslation = false;
-  showOptions = false;
-
-  app.innerHTML = `
-    <div class="card">
-      <div class="top-row">
-        <div>${practiceIndex+1}/${practiceQueue.length}</div>
-        <button onclick="speak('${w.en}')">🔊</button>
-      </div>
-
-      <div class="word">${w.en}</div>
-      ${showTranslation ? `<div class="translation">${w.he}</div>` : ""}
-
-      <button onclick="revealTranslation()">Show Translation</button>
-      <button onclick="revealOptions()">Show Options</button>
-      <button onclick="nextWord()">Next Word</button>
-
-      <hr />
-      <button class="secondary" onclick="editWord()">Edit Word</button>
-      <button class="secondary" onclick="hideWord()">Hide</button>
-      <button class="danger" onclick="deleteWord()">Delete</button>
-
-      <button class="secondary" onclick="mainMenu()">Finish Practice</button>
-    </div>
-  `;
+function loadWord(){
+  let w = practiceQueue[index];
+  progress.innerText = `${index+1}/${practiceQueue.length}`;
+  word.innerText = w.e;
+  translation.innerText = "";
+  options.innerHTML = "";
+  document.getElementById('vxButtons').style.display='none';
+  optionLocked=false;
+  waitVX=false;
+  showTranslationBtn.disabled=false;
+  showOptionsBtn.disabled=false;
 }
 
-function revealTranslation() {
-  showTranslation = true;
-  showWord();
+function showTranslation(){
+  translation.innerText = practiceQueue[index].h;
+  showTranslationBtn.disabled=true;
+  showOptionsBtn.disabled=true;
+  document.getElementById('vxButtons').style.display='block';
+  waitVX=true;
 }
 
-function revealOptions() {
-  showOptions = true;
-  const w = practiceQueue[practiceIndex];
-  const options = shuffle([w.he, "אופציה אקראית", "אופציה שגויה", "תרגום אחר"]);
-  let html = options.map(o=>`<div class="option">${o}</div>`).join("");
-  app.querySelector(".card").insertAdjacentHTML("beforeend", html);
-}
+function showOptions(){
+  showTranslationBtn.disabled=true;
+  showOptionsBtn.disabled=true;
+  let correct = practiceQueue[index].h;
+  let pool = words.map(w=>w.h).filter(x=>x!==correct);
+  pool.sort(()=>0.5-Math.random());
+  let opts = pool.slice(0,3);
+  opts.push(correct);
+  opts.sort(()=>0.5-Math.random());
 
-function nextWord() {
-  practiceQueue[practiceIndex].wasShown = true;
-  saveWords(words);
-  practiceIndex++;
-  if (practiceIndex >= practiceQueue.length) {
-    alert("Practice Completed");
-    return mainMenu();
-  }
-  showWord();
-}
-
-/* ========= Helpers ========= */
-function shuffle(arr) {
-  return arr.sort(()=>Math.random()-0.5);
-}
-function speak(t) {
-  speechSynthesis.speak(new SpeechSynthesisUtterance(t));
-}
-function deleteWord() {
-  if (!confirm("Delete word?")) return;
-  const w = practiceQueue[practiceIndex];
-  words = words.filter(x=>x!==w);
-  saveWords(words);
-  mainMenu();
-}
-function hideWord() {
-  practiceQueue[practiceIndex].hidden = true;
-  saveWords(words);
-  nextWord();
-}
-function editWord() {
-  const w = practiceQueue[practiceIndex];
-  app.innerHTML = `
-    <div class="card">
-      <input id="en" value="${w.en}" style="width:100%;padding:10px" />
-      <input id="he" value="${w.he}" style="width:100%;padding:10px;margin-top:8px" />
-      <button onclick="saveEdit()">Save</button>
-    </div>
-  `;
-}
-function saveEdit() {
-  const w = practiceQueue[practiceIndex];
-  w.en = document.getElementById("en").value;
-  w.he = document.getElementById("he").value;
-  saveWords(words);
-  showWord();
-}
-
-/* ========= CSV ========= */
-function exportCSV() {
-  let csv = "English,Hebrew,Hidden,Created\n";
-  words.forEach(w=>{
-    csv += `"${w.en}","${w.he}",${w.hidden},${new Date(w.createdAt).toISOString()}\n`;
+  opts.forEach(t=>{
+    let d=document.createElement('div');
+    d.className='option';
+    d.innerText=t;
+    d.onclick=()=>{
+      if(optionLocked) return;
+      optionLocked=true;
+      document.querySelectorAll('.option').forEach(o=>o.onclick=null);
+      if(t===correct){
+        d.classList.add('correct');
+        score++;
+        document.getElementById('vxButtons').style.display='block';
+        waitVX=true;
+      } else {
+        d.classList.add('wrong');
+        [...options.children].find(o=>o.innerText===correct).classList.add('correct');
+        practiceQueue[index].wasCorrect=false;
+        document.getElementById('vxButtons').style.display='block';
+        waitVX=true;
+      }
+    };
+    options.appendChild(d);
   });
-  const blob = new Blob([csv],{type:"text/csv"});
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = `words_${Date.now()}.csv`;
-  a.click();
-}
-function loadCSV() {
-  alert("CSV Load placeholder – stable baseline");
-}
-function resetDatabase() {
-  if (!confirm("Reset ALL words?")) return;
-  localStorage.removeItem(DB_KEY);
-  words=[];
-  mainMenu();
 }
 
-/* ========= Init ========= */
-mainMenu();
+function markV(){
+  practiceQueue[index].wasCorrect=true;
+  nextBtn.disabled=false;
+  waitVX=false;
+  document.getElementById('vxButtons').style.display='none';
+}
+
+function markX(){
+  practiceQueue[index].wasCorrect=false;
+  nextBtn.disabled=false;
+  waitVX=false;
+  document.getElementById('vxButtons').style.display='none';
+}
+
+function nextWord(){
+  if(waitVX) return alert("Please mark V or X before proceeding.");
+  practiceQueue[index].shown=true;
+  index++;
+  if(index>=practiceQueue.length){
+    let allDone = words.every(w=>w.hidden || w.shown);
+    if(allDone){
+      alert(`🎉 Congratulations!\nYou have covered all words in the database.\nScore: ${score}/${practiceQueue.length}`);
+      words.forEach(w=>w.shown=false);
+    } else {
+      alert(`Practice Completed\nScore: ${score}/${practiceQueue.length}`);
+    }
+    save();
+    go('main');
+    return;
+  }
+  loadWord();
+}
+
+function finishPractice(){ go('main'); }
+function hideWord(){ practiceQueue[index].hidden=true; save(); nextWord(); }
+function editWord(){
+  let w = practiceQueue[index];
+  let ne = prompt("Edit English", w.e); if(ne===null) return;
+  let nh = prompt("Edit Hebrew", w.h); if(nh===null) return;
+  w.e=ne; w.h=nh; save(); loadWord();
+}
+function deleteWord(){ if(!confirm("Delete this word?")) return; let w=practiceQueue[index]; words=words.filter(x=>x!==w); save(); practiceQueue.splice(index,1); if(index>=practiceQueue.length){go('main');}else{loadWord();} }
+function speakWord(){ let u=new SpeechSynthesisUtterance(practiceQueue[index].e); speechSynthesis.speak(u); }
+
+function exportCSV(){
+  let csv="English,Hebrew,Hidden,Date Created\n";
+  words.forEach(w=>{ csv+=`"${w.e}","${w.h}",${w.hidden},"${w.created}"\n`; });
+  let a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv])); a.download=`words_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+}
+
+function loadCSV(){
+  let input=document.createElement('input');
+  input.type='file';
+  input.accept='.csv';
+  input.onchange=e=>{
+    let file=e.target.files[0]; if(!file) return;
+    let reader=new FileReader();
+    reader.onload=evt=>{
+      let lines=evt.target.result.split(/\r?\n/);
+      let skipped=0, added=0;
+      let existing = new Set(words.map(w=>w.e.toLowerCase()));
+      lines.slice(1).forEach(l=>{
+        if(!l.trim()) return;
+        let parts=l.split(',');
+        if(parts.length<2) return;
+        let en=parts[0].trim().replace(/^"+|"+$/g,'');
+        let he=parts[1].trim().replace(/^"+|"+$/g,'');
+        let dateStr = parts[2]? parts[2].trim().replace(/^"+|"+$/g,'') : null;
+        if(existing.has(en.toLowerCase())) { skipped++; return; }
+        let created = dateStr? (()=>{ let d=dateStr.split('/'); if(d.length===3) return new Date(+d[2],+d[1]-1,+d[0]).toISOString(); else return new Date().toISOString(); })() : new Date().toISOString();
+        words.push({ e:en, h:he, hidden:false, shown:false, created });
+        existing.add(en.toLowerCase()); added++;
+      });
+      save();
+      alert(`Load completed\nAdded: ${added}\nSkipped (duplicates): ${skipped}`);
+      go('main');
+    };
+    reader.readAsText(file,'UTF-8');
+  };
+  input.click();
+}
+
+function resetDatabase(){
+  if(confirm("Delete ALL words?")){ words=[]; save(); }
+}
 </script>
 
 </body>
