@@ -1,323 +1,349 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Words App</title>
 
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background: #f5f7fa;
-  margin: 0;
-  padding: 0;
-  text-align: center;
+:root {
+  --primary: #2563eb;
+  --success: #16a34a;
+  --danger: #dc2626;
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --text: #0f172a;
 }
 
-h1, h2 {
-  margin: 10px 0;
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.screen {
+  display: none;
+  padding: 20px;
+  max-width: 600px;
+  margin: auto;
+}
+
+.screen.active {
+  display: block;
+}
+
+h1 {
+  text-align: center;
 }
 
 button {
   padding: 14px;
-  margin: 8px auto;
-  width: 60%;
   font-size: 16px;
   border-radius: 8px;
   border: none;
   cursor: pointer;
 }
 
-.primary { background: #4a90e2; color: white; }
-.secondary { background: #e0e0e0; }
-.danger { background: #e74c3c; color: white; }
+button.primary { background: var(--primary); color: white; }
+button.success { background: var(--success); color: white; }
+button.danger  { background: var(--danger); color: white; }
+button.secondary { background: #e5e7eb; }
 
 button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-input {
-  padding: 10px;
-  margin: 6px;
-  width: 80%;
+.main-buttons button {
+  display: block;
+  width: 60%;
+  margin: 12px auto;
 }
 
 .card {
-  background: white;
-  margin: 10px;
-  padding: 15px;
+  background: var(--card);
+  padding: 20px;
   border-radius: 10px;
+  margin-bottom: 20px;
 }
 
-.option {
-  border: 2px solid #ccc;
-  padding: 12px;
-  margin: 6px auto;
-  width: 80%;
-  border-radius: 8px;
-}
-
-.correct { border-color: green; background: #eaffea; }
-.wrong { border-color: red; background: #ffeaea; }
-
-.top-bar {
+.word-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-footer {
-  font-size: 12px;
+.word-count {
+  font-size: 14px;
+}
+
+.word-text {
+  text-align: center;
+  font-size: 32px;
+  font-weight: bold;
   margin: 20px 0;
-  color: #555;
+}
+
+.translation {
+  text-align: center;
+  font-size: 22px;
+  color: var(--primary);
+  margin-bottom: 20px;
+}
+
+.options {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.option {
+  padding: 14px;
+  border-radius: 8px;
+  background: #f1f5f9;
+  border: 2px solid transparent;
+}
+
+.option.correct { background: #dcfce7; border-color: var(--success); }
+.option.wrong   { background: #fee2e2; border-color: var(--danger); }
+
+.footer {
+  text-align: center;
+  font-size: 12px;
+  margin-top: 40px;
+  color: #475569;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0;
 }
 </style>
 </head>
 
 <body>
 
-<h1>My Words App</h1>
+<!-- MAIN -->
+<div class="screen active" id="mainScreen">
+  <h1>My Words App</h1>
 
-<div id="mainMenu" class="card">
-  <button class="primary" onclick="showAdd()">Add Word</button>
-  <button class="primary" onclick="showPracticeSetup()">Practice Words</button>
-  <button class="secondary" onclick="exportCSV()">Export Words</button>
-  <button class="secondary" onclick="document.getElementById('fileInput').click()">Load List</button>
+  <div class="main-buttons">
+    <button class="primary" onclick="goAdd()">Add Word</button>
+    <button class="primary" onclick="goPractice()">Practice Words</button>
+    <button class="primary" onclick="loadList()">Load List</button>
+    <button class="primary" onclick="exportCSV()">Export Word List</button>
+    <button class="danger" onclick="resetDatabase()">Reset Word Database</button>
+  </div>
 
-  <p id="wordCount"></p>
-  <input type="file" id="fileInput" accept=".csv" hidden onchange="loadCSV(event)">
+  <p style="text-align:center;margin-top:20px;">
+    Number of words in database: <b id="wordCount"></b>
+  </p>
+
+  <div class="footer">
+    This App was designed by Eli Anenburg and His AI friend
+  </div>
 </div>
 
 <!-- ADD WORD -->
-<div id="addWord" class="card" hidden>
-  <h2>Add Word</h2>
-  <input id="eng" placeholder="English word"/>
-  <input id="heb" placeholder="Hebrew translation"/>
-  <button class="primary" onclick="saveWord()">Save</button>
-  <button class="secondary" onclick="back()">Back</button>
-</div>
+<div class="screen" id="addScreen">
+  <h1>Add Word</h1>
 
-<!-- PRACTICE SETUP -->
-<div id="practiceSetup" class="card" hidden>
-  <h2>Practice Setup</h2>
-  <label><input type="checkbox" id="resetPractice"/> Reset Practice</label><br><br>
-  <button class="primary" onclick="startPractice(30)">30</button>
-  <button class="primary" onclick="startPractice(50)">50</button>
-  <button class="primary" onclick="startPractice(100)">100</button>
-  <button class="primary" onclick="startPractice(200)">200</button>
-  <button class="primary" onclick="startPractice('all')">All</button>
-  <button class="secondary" onclick="back()">Back</button>
+  <div class="card">
+    <input id="engInput" placeholder="English word" style="width:100%;padding:10px;font-size:16px">
+    <br><br>
+    <input id="hebInput" placeholder="Hebrew translation" style="width:100%;padding:10px;font-size:16px">
+    <br><br>
+    <button class="success" onclick="saveWord()">Save</button>
+    <button class="secondary" onclick="back()">Back</button>
+  </div>
 </div>
 
 <!-- PRACTICE -->
-<div id="practice" class="card" hidden>
-  <div class="top-bar">
-    <span id="progress"></span>
-    <button onclick="speak()">🔊</button>
+<div class="screen" id="practiceScreen">
+  <h1>Practice</h1>
+
+  <div class="card">
+    <div class="word-header">
+      <span class="word-count" id="practiceIndex"></span>
+      <button onclick="speak()">🔊</button>
+    </div>
+
+    <div class="word-text" id="practiceWord"></div>
+    <div class="translation" id="practiceTranslation"></div>
+
+    <div class="options" id="options"></div>
+
+    <button class="primary" id="showOptionsBtn" onclick="showOptions()">Show Options</button>
+    <button class="secondary" id="showTranslationBtn" onclick="showTranslation()">Show Translation</button>
+    <button class="primary" onclick="nextWord()">Next Word</button>
+
+    <hr>
+
+    <button class="secondary" onclick="editWord()">Edit Word</button>
+    <button class="danger" onclick="deleteWord()">Delete</button>
+    <button class="secondary" onclick="finishPractice()">Finish Practice</button>
   </div>
 
-  <h2 id="engWord"></h2>
-  <div id="translation"></div>
-
-  <button id="nextBtn" class="primary" onclick="markKnown()">Next Word</button>
-  <button id="showTranslationBtn" class="secondary" onclick="showTranslation()">Show Translation</button>
-  <button id="showOptionsBtn" class="secondary" onclick="showOptions()">Show Options</button>
-  <button class="secondary" onclick="hideWord()">Hide</button>
-
-  <div id="options"></div>
-
-  <button class="secondary" onclick="editWord()">Edit Word</button>
-  <button class="danger" onclick="deleteWord()">Delete</button>
-  <button class="secondary" onclick="finishPractice()">Finish Practice</button>
+  <div class="checkbox">
+    <input type="checkbox" id="resetPracticeChk">
+    <label>Reset Practice</label>
+  </div>
 </div>
-
-<footer>
-This App was designed by Eli Anenburg and His AI friend
-</footer>
 
 <script>
 let words = JSON.parse(localStorage.getItem("words") || "[]");
-let queue = [];
-let index = 0;
-let translationShown = false;
+let practiceQueue = [];
+let current = 0;
+let optionsLocked = false;
 
-function saveDB() {
+function save() {
   localStorage.setItem("words", JSON.stringify(words));
-  document.getElementById("wordCount").innerText =
-    "Number of words in database: " + words.length;
+  document.getElementById("wordCount").innerText = words.length;
+}
+save();
+
+function back() {
+  show("mainScreen");
 }
 
-saveDB();
+function show(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
 
-function showAdd() {
-  toggle("addWord");
+function goAdd() {
+  show("addScreen");
 }
 
 function saveWord() {
-  words.push({
-    eng: eng.value,
-    heb: heb.value,
-    hidden: false,
-    date: new Date().toISOString(),
-    shown: false
-  });
-  saveDB();
+  const e = engInput.value.trim();
+  const h = hebInput.value.trim();
+  if (!e || !h) return alert("Missing text");
+  words.unshift({ e, h, shown:false, created:new Date().toISOString() });
+  save();
+  engInput.value = hebInput.value = "";
   back();
 }
 
-function showPracticeSetup() {
-  toggle("practiceSetup");
-}
-
-function startPractice(count) {
-  if (resetPractice.checked) {
+function goPractice() {
+  if (document.getElementById("resetPracticeChk").checked) {
     words.forEach(w => w.shown = false);
   }
 
-  let available = words.filter(w => !w.hidden && !w.shown);
-  if (available.length === 0) {
-    alert("All Words in database were covered, Please Reset Practice");
-    back();
+  practiceQueue = words.filter(w => !w.shown);
+  if (practiceQueue.length === 0) {
+    alert("All Words in database were covered\nPlease Reset Practice");
     return;
   }
-
-  queue = (count === 'all' ? available : available.slice(0, Math.min(count, available.length)));
-  index = 0;
-  toggle("practice");
-  render();
+  current = 0;
+  loadWord();
+  show("practiceScreen");
 }
 
-function render() {
-  translationShown = false;
+function loadWord() {
+  const w = practiceQueue[current];
+  practiceWord.innerText = w.e;
+  practiceTranslation.innerText = "";
+  practiceIndex.innerText = `${current+1} / ${practiceQueue.length}`;
   options.innerHTML = "";
-  translation.innerText = "";
   showOptionsBtn.disabled = false;
-
-  let w = queue[index];
-  w.shown = true;
-
-  engWord.innerText = w.eng;
-  progress.innerText = (index + 1) + "/" + queue.length;
+  showTranslationBtn.disabled = false;
+  optionsLocked = false;
 }
 
 function showTranslation() {
-  translation.innerText = queue[index].heb;
-  translationShown = true;
+  practiceTranslation.innerText = practiceQueue[current].h;
   showOptionsBtn.disabled = true;
 }
 
 function showOptions() {
-  if (translationShown) return;
-  options.innerHTML = "";
-  let correct = queue[index].heb;
-  let opts = [correct];
-  while (opts.length < 4 && words.length > opts.length) {
-    let r = words[Math.floor(Math.random() * words.length)].heb;
-    if (!opts.includes(r)) opts.push(r);
-  }
-  opts.sort(() => Math.random() - 0.5);
+  showTranslationBtn.disabled = true;
+  showOptionsBtn.disabled = true;
+  optionsLocked = false;
 
-  opts.forEach(o => {
-    let d = document.createElement("div");
-    d.className = "option";
-    d.innerText = o;
-    d.onclick = () => {
-      if (o === correct) d.classList.add("correct");
-      else {
-        d.classList.add("wrong");
-        options.querySelectorAll(".option").forEach(x => {
-          if (x.innerText === correct) x.classList.add("correct");
-        });
-      }
-    };
-    options.appendChild(d);
+  const correct = practiceQueue[current].h;
+  let pool = words.map(w => w.h).filter(h => h !== correct);
+  pool = pool.sort(() => 0.5 - Math.random()).slice(0,3);
+  pool.push(correct);
+  pool = pool.sort(() => 0.5 - Math.random());
+
+  options.innerHTML = "";
+  pool.forEach(text => {
+    const div = document.createElement("div");
+    div.className = "option";
+    div.innerText = text;
+    div.onclick = () => choose(div, text === correct);
+    options.appendChild(div);
   });
 }
 
-function markKnown() {
-  next();
+function choose(el, ok) {
+  if (optionsLocked) return;
+  optionsLocked = true;
+  [...options.children].forEach(o => {
+    if (o.innerText === practiceQueue[current].h) o.classList.add("correct");
+  });
+  if (!ok) el.classList.add("wrong");
 }
 
-function next() {
-  index++;
-  if (index >= queue.length) {
+function nextWord() {
+  practiceQueue[current].shown = true;
+  current++;
+  if (current >= practiceQueue.length) {
     alert("Practice Complete");
     back();
+    save();
     return;
   }
-  render();
+  loadWord();
 }
 
-function hideWord() {
-  queue[index].hidden = true;
-  saveDB();
-  next();
+function speak() {
+  speechSynthesis.speak(new SpeechSynthesisUtterance(practiceQueue[current].e));
 }
 
 function editWord() {
-  let w = queue[index];
-  let e = prompt("Edit English", w.eng);
-  let h = prompt("Edit Hebrew", w.heb);
-  if (e !== null && h !== null) {
-    w.eng = e;
-    w.heb = h;
-    saveDB();
-    render();
+  const w = practiceQueue[current];
+  const e = prompt("Edit English", w.e);
+  const h = prompt("Edit Hebrew", w.h);
+  if (e && h) {
+    w.e = e; w.h = h;
+    save();
+    loadWord();
   }
 }
 
 function deleteWord() {
   if (!confirm("Delete Word?")) return;
-  words = words.filter(w => w !== queue[index]);
-  saveDB();
-  next();
-}
-
-function speak() {
-  speechSynthesis.speak(new SpeechSynthesisUtterance(queue[index].eng));
+  const w = practiceQueue[current];
+  words = words.filter(x => x !== w);
+  save();
+  back();
 }
 
 function finishPractice() {
   back();
 }
 
-function back() {
-  toggle("mainMenu");
-}
-
-function toggle(id) {
-  ["mainMenu","addWord","practiceSetup","practice"].forEach(x =>
-    document.getElementById(x).hidden = x !== id
-  );
-}
-
 function exportCSV() {
-  let csv = "English,Hebrew,Hidden,Date\n";
-  words.forEach(w => csv += `${w.eng},${w.heb},${w.hidden},${w.date}\n`);
-  let blob = new Blob([csv], {type:"text/csv"});
-  let a = document.createElement("a");
+  let csv = "English,Hebrew,IsHidden,DateCreated\n";
+  words.forEach(w => {
+    csv += `"${w.e}","${w.h}",false,"${w.created}"\n`;
+  });
+  const blob = new Blob([csv], {type:"text/csv"});
+  const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "my_words_" + new Date().toISOString().slice(0,10) + ".csv";
+  a.download = `my_words_${new Date().toISOString().slice(0,10)}.csv`;
   a.click();
 }
 
-function loadCSV(e) {
-  let file = e.target.files[0];
-  let reader = new FileReader();
-  reader.onload = () => {
-    let lines = reader.result.split("\n").slice(1);
-    let skipped = 0;
-    lines.forEach(l => {
-      let [eng,heb] = l.split(",");
-      if (!words.some(w => w.eng === eng)) {
-        words.push({eng,heb,hidden:false,date:new Date().toISOString(),shown:false});
-      } else skipped++;
-    });
-    saveDB();
-    alert("Import done. Skipped duplicates: " + skipped);
-  };
-  reader.readAsText(file);
+function resetDatabase() {
+  if (!confirm("Delete ALL words?")) return;
+  words = [];
+  save();
 }
 </script>
 
