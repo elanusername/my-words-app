@@ -2,365 +2,335 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>My Words App</title>
-
+<title>Word Practice App</title>
 <style>
 body {
   font-family: Arial, sans-serif;
-  background:#f1f5f9;
-  margin:0;
+  background: #f4f6f8;
+  margin: 0;
+  padding: 0;
 }
-
-.screen {
-  display:none;
-  max-width:600px;
-  margin:auto;
-  padding:20px;
+header {
+  background: #2c3e50;
+  color: white;
+  padding: 16px;
+  text-align: center;
 }
-.screen.active { display:block; }
-
-h1 { text-align:center; }
-
+main {
+  padding: 20px;
+}
 button {
-  padding:14px;
-  font-size:16px;
-  border-radius:8px;
-  border:none;
-  cursor:pointer;
-  margin:6px 0;
+  padding: 12px 18px;
+  margin: 6px;
+  font-size: 16px;
+  cursor: pointer;
 }
-
-.primary { background:#2563eb; color:#fff; }
-.secondary { background:#e5e7eb; }
-.danger { background:#dc2626; color:#fff; }
-
-.main-buttons button {
-  width:60%;
-  display:block;
-  margin:10px auto;
+.primary {
+  background: #3498db;
+  color: white;
+  border: none;
 }
-
-.card {
-  background:#fff;
-  padding:20px;
-  border-radius:12px;
+.success {
+  background: #2ecc71;
+  color: white;
+  border: none;
 }
-
-.word {
-  font-size:34px;
-  text-align:center;
-  margin:20px 0 10px;
+.danger {
+  background: #e74c3c;
+  color: white;
+  border: none;
 }
-
-.translation {
-  font-size:22px;
-  text-align:center;
-  color:#2563eb;
-  margin-bottom:10px;
+.secondary {
+  background: #95a5a6;
+  color: white;
+  border: none;
 }
-
-.top-row {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
+.hidden {
+  display: none;
 }
-
-.options .option {
-  padding:12px;
-  border-radius:8px;
-  background:#e5e7eb;
-  margin:6px 0;
+.center {
+  text-align: center;
 }
-
-.option.correct { background:#bbf7d0; }
-.option.wrong { background:#fecaca; }
-
+.big-word {
+  font-size: 36px;
+  font-weight: bold;
+}
+.options button {
+  display: block;
+  width: 80%;
+  margin: 8px auto;
+}
 .footer {
-  text-align:center;
-  font-size:12px;
-  margin-top:40px;
-  color:#475569;
+  text-align: center;
+  font-size: 12px;
+  color: #777;
+  margin-top: 40px;
+}
+.checkbox {
+  margin-top: 10px;
 }
 </style>
 </head>
 
 <body>
+<header>
+  <h1>Word Practice App</h1>
+</header>
 
-<!-- MAIN -->
-<div class="screen active" id="main">
-<h1>My Words App</h1>
-<div class="main-buttons">
-  <button class="primary" onclick="go('add')">Add Word</button>
-  <button class="primary" onclick="go('practiceSetup')">Practice Words</button>
-  <button class="primary" onclick="loadCSV()">Load List</button>
-  <button class="primary" onclick="exportCSV()">Export Word List</button>
-  <button class="danger" onclick="resetDatabase()">Reset Word Database</button>
-</div>
-<p style="text-align:center">
-  Number of words in database: <b id="count"></b>
-</p>
-<div class="footer">
-  This App was designed by Eli Anenburg and His AI friend
-</div>
-</div>
+<main>
 
-<!-- ADD WORD -->
-<div class="screen" id="add">
-<h1>Add Word</h1>
-<div class="card">
-  <input id="eng" placeholder="English" style="width:100%;padding:10px"><br><br>
-  <input id="heb" placeholder="Hebrew" style="width:100%;padding:10px"><br><br>
-  <button class="primary" onclick="saveWord()">Save</button>
-  <button class="secondary" onclick="go('main')">Back</button>
-</div>
+<!-- MAIN MENU -->
+<div id="mainMenu" class="center">
+  <button class="primary" style="width:60%" onclick="openPracticeSetup()">Practice Words</button><br>
+  <button class="primary" style="width:60%" onclick="loadSample()">Load Sample List</button><br>
+  <button class="danger" style="width:60%" onclick="resetDatabase()">Reset Word Database</button>
+  <p id="wordCount"></p>
 </div>
 
 <!-- PRACTICE SETUP -->
-<div class="screen" id="practiceSetup">
-<h1>Practice Setup</h1>
-<div class="card">
-<select id="limit" style="width:100%;padding:10px">
-  <option value="30">30 words</option>
-  <option value="50">50 words</option>
-  <option value="100">100 words</option>
-  <option value="200">200 words</option>
-  <option value="all">All words</option>
-</select><br><br>
-<label>
-  <input type="checkbox" id="resetPractice">
-  Reset Practice
-</label><br><br>
-<button class="primary" onclick="startPractice()">Start Practice</button>
-<button class="secondary" onclick="go('main')">Back</button>
-</div>
+<div id="practiceSetup" class="hidden center">
+  <h2>Select Practice Size</h2>
+  <button onclick="startPractice(30)">30</button>
+  <button onclick="startPractice(50)">50</button>
+  <button onclick="startPractice(100)">100</button>
+  <button onclick="startPractice(200)">200</button>
+  <button onclick="startPractice('ALL')">ALL</button>
+
+  <div class="checkbox">
+    <label>
+      <input type="checkbox" id="resetPracticeCheckbox">
+      Reset Practice
+    </label>
+  </div>
+
+  <br>
+  <button class="secondary" onclick="goHome()">Back</button>
 </div>
 
-<!-- PRACTICE -->
-<div class="screen" id="practice">
-<h1>Practice</h1>
-<div class="card">
-
-<div class="top-row">
+<!-- PRACTICE SCREEN -->
+<div id="practiceScreen" class="hidden center">
   <div id="progress"></div>
-  <button onclick="speakWord()">🔊</button>
+  <div class="big-word" id="englishWord"></div>
+
+  <div id="translation" class="hidden"></div>
+
+  <div id="confirmButtons" class="hidden">
+    <button class="success" onclick="confirmKnown(true)">✔ V</button>
+    <button class="danger" onclick="confirmKnown(false)">✖ X</button>
+  </div>
+
+  <div>
+    <button id="showTranslationBtn" onclick="showTranslation()">Show Translation</button>
+    <button id="showOptionsBtn" onclick="showOptions()">Show Options</button>
+  </div>
+
+  <div class="options hidden" id="options"></div>
+
+  <button id="nextBtn" class="primary hidden" onclick="nextWord()">Next Word</button>
 </div>
 
-<div class="word" id="word"></div>
-<div class="translation" id="translation"></div>
-
-<div class="options" id="options"></div>
-
-<button class="secondary" id="showTranslationBtn" onclick="showTranslation()">Show Translation</button>
-<button class="secondary" id="showOptionsBtn" onclick="showOptions()">Show Options</button>
-<button class="primary" id="nextBtn" onclick="nextWord()">Next Word</button>
-
-<hr>
-
-<button class="secondary" onclick="editWord()">Edit Word</button>
-<button class="secondary" onclick="hideWord()">Hide</button>
-<button class="danger" onclick="deleteWord()">Delete</button>
-
-<button class="secondary" onclick="finishPractice()">Finish Practice</button>
-
+<!-- PRACTICE COMPLETE -->
+<div id="practiceComplete" class="hidden center">
+  <h2>Practice Completed ✅</h2>
+  <p id="practiceSummary"></p>
+  <button class="primary" onclick="goHome()">Back to Main Menu</button>
 </div>
+
+<div class="footer">
+  This App was designed by Eli Anenburg and His AI friend
 </div>
+
+</main>
 
 <script>
-let words = JSON.parse(localStorage.words || "[]");
+const STORAGE_KEY = "wordsDB";
+let words = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+
 let practiceQueue = [];
-let index = 0;
-let score = 0;
-let optionLocked = false;
+let currentIndex = 0;
+let currentWord = null;
+let waitingForDecision = false;
 
 function save() {
-  localStorage.words = JSON.stringify(words);
-  count.innerText = words.length;
-}
-save();
-
-function go(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(words));
+  updateWordCount();
 }
 
-function saveWord(){
-  if(!eng.value || !heb.value) return alert("Missing value");
-  words.unshift({
-    e: eng.value,
-    h: heb.value,
-    hidden:false,
-    shown:false,
-    created:new Date().toISOString()
+function updateWordCount() {
+  document.getElementById("wordCount").innerText =
+    "Number of words in database: " + words.length;
+}
+
+updateWordCount();
+
+/* ---------- DATABASE ---------- */
+function resetDatabase() {
+  if (!confirm("Are you sure you want to delete ALL words?")) return;
+  words = [];
+  save();
+}
+
+function loadSample() {
+  const sample = [
+    ["apple", "תפוח"],
+    ["dog", "כלב"],
+    ["house", "בית"],
+    ["sun", "שמש"],
+    ["water", "מים"]
+  ];
+  sample.forEach(([e,t]) => {
+    if (!words.find(w => w.english === e)) {
+      words.push({
+        english: e,
+        translation: t,
+        createdAt: Date.now(),
+        isHidden: false,
+        wasShownInCurrentCycle: false,
+        wasCorrectInLastCycle: true,
+        wasConfirmedKnown: false
+      });
+    }
   });
   save();
-  eng.value=heb.value="";
-  go('main');
 }
 
-function startPractice(){
-  if(resetPractice.checked) words.forEach(w=>w.shown=false);
+/* ---------- NAV ---------- */
+function goHome() {
+  hideAll();
+  document.getElementById("mainMenu").classList.remove("hidden");
+}
 
-  let pool = words.filter(w=>!w.hidden && !w.shown);
-  if(pool.length===0){
-    alert("All words were already practiced. Resetting automatically.");
-    words.forEach(w=>w.shown=false);
-    pool = words.filter(w=>!w.hidden);
+function openPracticeSetup() {
+  hideAll();
+  document.getElementById("practiceSetup").classList.remove("hidden");
+}
+
+function hideAll() {
+  document.querySelectorAll("main > div").forEach(d => d.classList.add("hidden"));
+}
+
+/* ---------- PRACTICE LOGIC ---------- */
+function startPractice(limit) {
+  if (document.getElementById("resetPracticeCheckbox").checked) {
+    words.forEach(w => {
+      w.wasShownInCurrentCycle = false;
+      w.wasConfirmedKnown = false;
+    });
+    save();
   }
 
-  let lim = limit.value==="all" ? pool.length : Math.min(+limit.value, pool.length);
-  practiceQueue = pool.slice(0, lim);
-  index=0; score=0;
-  loadWord();
-  go('practice');
-}
+  const candidates = words.filter(w => !w.isHidden && !w.wasConfirmedKnown);
 
-function loadWord(){
-  let w = practiceQueue[index];
-  progress.innerText = `${index+1}/${practiceQueue.length}`;
-  word.innerText = w.e;
-  translation.innerText = "";
-  options.innerHTML = "";
-  optionLocked=false;
-  showTranslationBtn.disabled=false;
-  showOptionsBtn.disabled=false;
-}
+  const incorrect = candidates.filter(w => w.wasCorrectInLastCycle === false);
+  const lifo = candidates
+    .filter(w => w.wasCorrectInLastCycle !== false)
+    .sort((a,b) => b.createdAt - a.createdAt);
 
-function showTranslation(){
-  translation.innerText = practiceQueue[index].h;
-  showOptionsBtn.disabled=true;
-}
+  practiceQueue = [...incorrect, ...lifo];
+  if (limit !== "ALL") practiceQueue = practiceQueue.slice(0, limit);
 
-function showOptions(){
-  showTranslationBtn.disabled=true;
-  showOptionsBtn.disabled=true;
-  let correct = practiceQueue[index].h;
-  let pool = words.map(w=>w.h).filter(x=>x!==correct);
-  pool.sort(()=>0.5-Math.random());
-  let opts = pool.slice(0,3);
-  opts.push(correct);
-  opts.sort(()=>0.5-Math.random());
-
-  opts.forEach(t=>{
-    let d=document.createElement('div');
-    d.className='option';
-    d.innerText=t;
-    d.onclick=()=>{
-      if(optionLocked) return;
-      optionLocked=true;
-      document.querySelectorAll('.option').forEach(o=>o.onclick=null);
-      if(t===correct){
-        d.classList.add('correct');
-        score++;
-      } else {
-        d.classList.add('wrong');
-        [...options.children].find(o=>o.innerText===correct).classList.add('correct');
-      }
-    };
-    options.appendChild(d);
-  });
-}
-
-function nextWord(){
-  practiceQueue[index].shown=true;
-  index++;
-  if(index>=practiceQueue.length){
-    if(words.every(w=>w.hidden || w.shown)){
-      alert(`Practice Completed\nCongratulations! All words in the database were covered.\nScore: ${score}/${practiceQueue.length}`);
-      words.forEach(w=>w.shown=false);
-    } else {
-      alert(`Practice Completed\nScore: ${score}/${practiceQueue.length}`);
-    }
-    save();
-    go('main');
+  if (practiceQueue.length === 0) {
+    alert("Congratulations! All words were covered 🎉");
+    goHome();
     return;
   }
-  loadWord();
+
+  currentIndex = 0;
+  hideAll();
+  document.getElementById("practiceScreen").classList.remove("hidden");
+  showCurrentWord();
 }
 
-function finishPractice(){
-  go('main');
+function showCurrentWord() {
+  currentWord = practiceQueue[currentIndex];
+  document.getElementById("englishWord").innerText = currentWord.english;
+  document.getElementById("translation").classList.add("hidden");
+  document.getElementById("confirmButtons").classList.add("hidden");
+  document.getElementById("options").classList.add("hidden");
+  document.getElementById("nextBtn").classList.add("hidden");
+  document.getElementById("showOptionsBtn").disabled = false;
+  document.getElementById("showTranslationBtn").disabled = false;
+  waitingForDecision = false;
+
+  document.getElementById("progress").innerText =
+    `${currentIndex+1} / ${practiceQueue.length}`;
 }
 
-function hideWord(){
-  practiceQueue[index].hidden=true;
-  save();
-  nextWord();
+function showTranslation() {
+  document.getElementById("translation").innerText = currentWord.translation;
+  document.getElementById("translation").classList.remove("hidden");
+  document.getElementById("confirmButtons").classList.remove("hidden");
+  document.getElementById("showOptionsBtn").disabled = true;
+  waitingForDecision = true;
 }
 
-function editWord(){
-  let w = practiceQueue[index];
-  let ne = prompt("Edit English", w.e);
-  if(ne===null) return;
-  let nh = prompt("Edit Hebrew", w.h);
-  if(nh===null) return;
-  w.e=ne; w.h=nh;
-  save();
-  loadWord();
-}
+function showOptions() {
+  document.getElementById("showOptionsBtn").disabled = true;
+  document.getElementById("showTranslationBtn").disabled = true;
 
-function deleteWord(){
-  if(!confirm("Delete this word?")) return;
-  let w = practiceQueue[index];
-  words = words.filter(x=>x!==w);
-  save();
-  practiceQueue.splice(index,1);
-  if(index>=practiceQueue.length){
-    go('main');
-  } else {
-    loadWord();
-  }
-}
+  const optionsDiv = document.getElementById("options");
+  optionsDiv.innerHTML = "";
+  optionsDiv.classList.remove("hidden");
 
-function speakWord(){
-  let u = new SpeechSynthesisUtterance(practiceQueue[index].e);
-  speechSynthesis.speak(u);
-}
+  const options = shuffle([
+    currentWord.translation,
+    ...shuffle(words.map(w => w.translation).filter(t => t !== currentWord.translation)).slice(0,3)
+  ]);
 
-function exportCSV(){
-  let csv="English,Hebrew,Hidden,Date Created\n";
-  words.forEach(w=>{
-    csv+=`"${w.e}","${w.h}",${w.hidden},"${w.created}"\n`;
+  options.forEach(opt => {
+    const btn = document.createElement("button");
+    btn.innerText = opt;
+    btn.onclick = () => handleOption(opt, btn);
+    optionsDiv.appendChild(btn);
   });
-  let a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([csv]));
-  a.download=`words_${new Date().toISOString().slice(0,10)}.csv`;
-  a.click();
 }
 
-function loadCSV(){
-  let input=document.createElement('input');
-  input.type='file';
-  input.accept='.csv';
-  input.onchange=e=>{
-    let file=e.target.files[0];
-    let reader=new FileReader();
-    reader.onload=()=>{
-      let lines=reader.result.split('\n');
-      let skipped=0;
-      lines.slice(1).forEach(l=>{
-        let parts=l.split(',');
-        if(parts.length<2) return;
-        let e=parts[0].replace(/"/g,'').trim();
-        let h=parts[1].replace(/"/g,'').trim();
-        if(words.find(w=>w.e===e)) { skipped++; return; }
-        words.push({e,h,hidden:false,shown:false,created:new Date().toISOString()});
-      });
-      save();
-      if(skipped) alert(`${skipped} duplicate words were skipped`);
-    };
-    reader.readAsText(file);
-  };
-  input.click();
-}
+function handleOption(opt, btn) {
+  if (waitingForDecision) return;
+  waitingForDecision = true;
 
-function resetDatabase(){
-  if(confirm("Delete ALL words?")){
-    words=[];
-    save();
+  const buttons = document.querySelectorAll("#options button");
+  buttons.forEach(b => b.disabled = true);
+
+  if (opt === currentWord.translation) {
+    btn.classList.add("success");
+    document.getElementById("confirmButtons").classList.remove("hidden");
+  } else {
+    btn.classList.add("danger");
+    buttons.forEach(b => {
+      if (b.innerText === currentWord.translation) {
+        b.classList.add("success");
+      }
+    });
+    currentWord.wasCorrectInLastCycle = false;
+    document.getElementById("nextBtn").classList.remove("hidden");
   }
+}
+
+function confirmKnown(known) {
+  currentWord.wasCorrectInLastCycle = known;
+  currentWord.wasConfirmedKnown = known;
+  document.getElementById("nextBtn").classList.remove("hidden");
+}
+
+function nextWord() {
+  currentWord.wasShownInCurrentCycle = true;
+  save();
+  currentIndex++;
+  if (currentIndex >= practiceQueue.length) {
+    hideAll();
+    document.getElementById("practiceComplete").classList.remove("hidden");
+    document.getElementById("practiceSummary").innerText =
+      `You practiced ${practiceQueue.length} words.`;
+  } else {
+    showCurrentWord();
+  }
+}
+
+/* ---------- UTILS ---------- */
+function shuffle(arr) {
+  return arr.sort(() => Math.random() - 0.5);
 }
 </script>
-
 </body>
 </html>
