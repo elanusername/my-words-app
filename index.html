@@ -1,27 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>My Words App</title>
 
 <style>
-body { font-family: Arial; background:#f8fafc; margin:0; }
-.screen { display:none; padding:20px; max-width:600px; margin:auto; }
+body {
+  font-family: Arial, sans-serif;
+  background:#f1f5f9;
+  margin:0;
+}
+
+.screen {
+  display:none;
+  max-width:600px;
+  margin:auto;
+  padding:20px;
+}
 .screen.active { display:block; }
+
 h1 { text-align:center; }
-button { padding:14px; font-size:16px; border-radius:8px; border:none; margin:6px 0; }
+
+button {
+  padding:14px;
+  font-size:16px;
+  border-radius:8px;
+  border:none;
+  cursor:pointer;
+  margin:6px 0;
+}
+
 .primary { background:#2563eb; color:#fff; }
 .secondary { background:#e5e7eb; }
 .danger { background:#dc2626; color:#fff; }
-.card { background:#fff; padding:20px; border-radius:10px; }
-.main-buttons button { width:60%; display:block; margin:10px auto; }
-.word { font-size:32px; text-align:center; margin:20px 0; }
-.translation { font-size:22px; text-align:center; color:#2563eb; }
-.option { padding:12px; border-radius:8px; background:#f1f5f9; margin:6px 0; }
-.correct { background:#dcfce7; }
-.wrong { background:#fee2e2; }
-.footer { font-size:12px; text-align:center; margin-top:40px; color:#475569; }
+
+.main-buttons button {
+  width:60%;
+  display:block;
+  margin:10px auto;
+}
+
+.card {
+  background:#fff;
+  padding:20px;
+  border-radius:12px;
+}
+
+.word {
+  font-size:34px;
+  text-align:center;
+  margin:20px 0 10px;
+}
+
+.translation {
+  font-size:22px;
+  text-align:center;
+  color:#2563eb;
+  margin-bottom:10px;
+}
+
+.top-row {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.options .option {
+  padding:12px;
+  border-radius:8px;
+  background:#e5e7eb;
+  margin:6px 0;
+}
+
+.option.correct { background:#bbf7d0; }
+.option.wrong { background:#fecaca; }
+
+.footer {
+  text-align:center;
+  font-size:12px;
+  margin-top:40px;
+  color:#475569;
+}
 </style>
 </head>
 
@@ -31,23 +91,28 @@ button { padding:14px; font-size:16px; border-radius:8px; border:none; margin:6p
 <div class="screen active" id="main">
 <h1>My Words App</h1>
 <div class="main-buttons">
-<button class="primary" onclick="go('add')">Add Word</button>
-<button class="primary" onclick="go('practiceSetup')">Practice Words</button>
-<button class="primary" onclick="exportCSV()">Export Word List</button>
-<button class="danger" onclick="resetDB()">Reset Word Database</button>
+  <button class="primary" onclick="go('add')">Add Word</button>
+  <button class="primary" onclick="go('practiceSetup')">Practice Words</button>
+  <button class="primary" onclick="loadCSV()">Load List</button>
+  <button class="primary" onclick="exportCSV()">Export Word List</button>
+  <button class="danger" onclick="resetDatabase()">Reset Word Database</button>
 </div>
-<p style="text-align:center">Number of words in database: <b id="count"></b></p>
-<div class="footer">This App was designed by Eli Anenburg and His AI friend</div>
+<p style="text-align:center">
+  Number of words in database: <b id="count"></b>
+</p>
+<div class="footer">
+  This App was designed by Eli Anenburg and His AI friend
+</div>
 </div>
 
-<!-- ADD -->
+<!-- ADD WORD -->
 <div class="screen" id="add">
 <h1>Add Word</h1>
 <div class="card">
-<input id="e" placeholder="English" style="width:100%;padding:10px"><br><br>
-<input id="h" placeholder="Hebrew" style="width:100%;padding:10px"><br><br>
-<button class="primary" onclick="saveWord()">Save</button>
-<button class="secondary" onclick="go('main')">Back</button>
+  <input id="eng" placeholder="English" style="width:100%;padding:10px"><br><br>
+  <input id="heb" placeholder="Hebrew" style="width:100%;padding:10px"><br><br>
+  <button class="primary" onclick="saveWord()">Save</button>
+  <button class="secondary" onclick="go('main')">Back</button>
 </div>
 </div>
 
@@ -56,13 +121,16 @@ button { padding:14px; font-size:16px; border-radius:8px; border:none; margin:6p
 <h1>Practice Setup</h1>
 <div class="card">
 <select id="limit" style="width:100%;padding:10px">
-<option value="30">30 words</option>
-<option value="50">50 words</option>
-<option value="100">100 words</option>
-<option value="200">200 words</option>
-<option value="all">All words</option>
+  <option value="30">30 words</option>
+  <option value="50">50 words</option>
+  <option value="100">100 words</option>
+  <option value="200">200 words</option>
+  <option value="all">All words</option>
 </select><br><br>
-<label><input type="checkbox" id="resetCycle"> Reset Practice</label><br><br>
+<label>
+  <input type="checkbox" id="resetPractice">
+  Reset Practice
+</label><br><br>
 <button class="primary" onclick="startPractice()">Start Practice</button>
 <button class="secondary" onclick="go('main')">Back</button>
 </div>
@@ -72,110 +140,225 @@ button { padding:14px; font-size:16px; border-radius:8px; border:none; margin:6p
 <div class="screen" id="practice">
 <h1>Practice</h1>
 <div class="card">
-<div id="idx"></div>
+
+<div class="top-row">
+  <div id="progress"></div>
+  <button onclick="speakWord()">🔊</button>
+</div>
+
 <div class="word" id="word"></div>
-<div class="translation" id="trans"></div>
-<div id="opts"></div>
-<button class="secondary" id="showT" onclick="showT()">Show Translation</button>
-<button class="secondary" id="showO" onclick="showO()">Show Options</button>
-<button class="primary" onclick="next()">Next Word</button>
-<button class="secondary" onclick="go('main')">Finish Practice</button>
+<div class="translation" id="translation"></div>
+
+<div class="options" id="options"></div>
+
+<button class="secondary" id="showTranslationBtn" onclick="showTranslation()">Show Translation</button>
+<button class="secondary" id="showOptionsBtn" onclick="showOptions()">Show Options</button>
+<button class="primary" id="nextBtn" onclick="nextWord()">Next Word</button>
+
+<hr>
+
+<button class="secondary" onclick="editWord()">Edit Word</button>
+<button class="secondary" onclick="hideWord()">Hide</button>
+<button class="danger" onclick="deleteWord()">Delete</button>
+
+<button class="secondary" onclick="finishPractice()">Finish Practice</button>
+
 </div>
 </div>
 
 <script>
-let words = JSON.parse(localStorage.words||"[]");
-let queue=[], i=0, score=0;
+let words = JSON.parse(localStorage.words || "[]");
+let practiceQueue = [];
+let index = 0;
+let score = 0;
+let optionLocked = false;
 
-function save(){ localStorage.words=JSON.stringify(words); count.innerText=words.length; }
+function save() {
+  localStorage.words = JSON.stringify(words);
+  count.innerText = words.length;
+}
 save();
 
 function go(id){
-document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
 }
 
 function saveWord(){
-if(!e.value||!h.value) return alert("Missing text");
-words.unshift({e:e.value,h:h.value,shown:false});
-save(); e.value=h.value=""; go('main');
+  if(!eng.value || !heb.value) return alert("Missing value");
+  words.unshift({
+    e: eng.value,
+    h: heb.value,
+    hidden:false,
+    shown:false,
+    created:new Date().toISOString()
+  });
+  save();
+  eng.value=heb.value="";
+  go('main');
 }
 
 function startPractice(){
-if(document.getElementById('resetCycle').checked)
-words.forEach(w=>w.shown=false);
+  if(resetPractice.checked) words.forEach(w=>w.shown=false);
 
-let unseen=words.filter(w=>!w.shown);
-if(unseen.length===0){
-words.forEach(w=>w.shown=false);
-unseen=[...words];
-}
+  let pool = words.filter(w=>!w.hidden && !w.shown);
+  if(pool.length===0){
+    alert("All words were already practiced. Resetting automatically.");
+    words.forEach(w=>w.shown=false);
+    pool = words.filter(w=>!w.hidden);
+  }
 
-let lim=limit.value==="all"?unseen.length:+limit.value;
-queue=unseen.slice(0,lim);
-i=0; score=0;
-load(); go('practice');
-}
-
-function load(){
-let w=queue[i];
-word.innerText=w.e;
-trans.innerText="";
-opts.innerHTML="";
-idx.innerText=`${i+1}/${queue.length}`;
-showT.disabled=false; showO.disabled=false;
+  let lim = limit.value==="all" ? pool.length : Math.min(+limit.value, pool.length);
+  practiceQueue = pool.slice(0, lim);
+  index=0; score=0;
+  loadWord();
+  go('practice');
 }
 
-function showT(){ trans.innerText=queue[i].h; showO.disabled=true; }
-
-function showO(){
-showT.disabled=true; showO.disabled=true;
-let correct=queue[i].h;
-let pool=words.map(w=>w.h).filter(x=>x!==correct).sort(()=>.5-Math.random()).slice(0,3);
-pool.push(correct); pool.sort(()=>.5-Math.random());
-pool.forEach(t=>{
-let d=document.createElement('div');
-d.className='option'; d.innerText=t;
-d.onclick=()=>{
-opts.querySelectorAll('.option').forEach(o=>o.onclick=null);
-if(t===correct){ d.classList.add('correct'); score++; }
-else{
-d.classList.add('wrong');
-[...opts.children].find(o=>o.innerText===correct).classList.add('correct');
-}
-};
-opts.appendChild(d);
-});
+function loadWord(){
+  let w = practiceQueue[index];
+  progress.innerText = `${index+1}/${practiceQueue.length}`;
+  word.innerText = w.e;
+  translation.innerText = "";
+  options.innerHTML = "";
+  optionLocked=false;
+  showTranslationBtn.disabled=false;
+  showOptionsBtn.disabled=false;
 }
 
-function next(){
-queue[i].shown=true;
-i++;
-if(i>=queue.length){
-if(words.every(w=>w.shown)){
-alert(`Practice Completed\nCongratulations! All words in the database were covered.\nScore: ${score}/${queue.length}`);
-words.forEach(w=>w.shown=false);
-}else{
-alert(`Practice Completed\nScore: ${score}/${queue.length}`);
+function showTranslation(){
+  translation.innerText = practiceQueue[index].h;
+  showOptionsBtn.disabled=true;
 }
-save(); go('main'); return;
+
+function showOptions(){
+  showTranslationBtn.disabled=true;
+  showOptionsBtn.disabled=true;
+  let correct = practiceQueue[index].h;
+  let pool = words.map(w=>w.h).filter(x=>x!==correct);
+  pool.sort(()=>0.5-Math.random());
+  let opts = pool.slice(0,3);
+  opts.push(correct);
+  opts.sort(()=>0.5-Math.random());
+
+  opts.forEach(t=>{
+    let d=document.createElement('div');
+    d.className='option';
+    d.innerText=t;
+    d.onclick=()=>{
+      if(optionLocked) return;
+      optionLocked=true;
+      document.querySelectorAll('.option').forEach(o=>o.onclick=null);
+      if(t===correct){
+        d.classList.add('correct');
+        score++;
+      } else {
+        d.classList.add('wrong');
+        [...options.children].find(o=>o.innerText===correct).classList.add('correct');
+      }
+    };
+    options.appendChild(d);
+  });
 }
-load();
+
+function nextWord(){
+  practiceQueue[index].shown=true;
+  index++;
+  if(index>=practiceQueue.length){
+    if(words.every(w=>w.hidden || w.shown)){
+      alert(`Practice Completed\nCongratulations! All words in the database were covered.\nScore: ${score}/${practiceQueue.length}`);
+      words.forEach(w=>w.shown=false);
+    } else {
+      alert(`Practice Completed\nScore: ${score}/${practiceQueue.length}`);
+    }
+    save();
+    go('main');
+    return;
+  }
+  loadWord();
+}
+
+function finishPractice(){
+  go('main');
+}
+
+function hideWord(){
+  practiceQueue[index].hidden=true;
+  save();
+  nextWord();
+}
+
+function editWord(){
+  let w = practiceQueue[index];
+  let ne = prompt("Edit English", w.e);
+  if(ne===null) return;
+  let nh = prompt("Edit Hebrew", w.h);
+  if(nh===null) return;
+  w.e=ne; w.h=nh;
+  save();
+  loadWord();
+}
+
+function deleteWord(){
+  if(!confirm("Delete this word?")) return;
+  let w = practiceQueue[index];
+  words = words.filter(x=>x!==w);
+  save();
+  practiceQueue.splice(index,1);
+  if(index>=practiceQueue.length){
+    go('main');
+  } else {
+    loadWord();
+  }
+}
+
+function speakWord(){
+  let u = new SpeechSynthesisUtterance(practiceQueue[index].e);
+  speechSynthesis.speak(u);
 }
 
 function exportCSV(){
-let csv="English,Hebrew\n";
-words.forEach(w=>csv+=`"${w.e}","${w.h}"\n`);
-let a=document.createElement('a');
-a.href=URL.createObjectURL(new Blob([csv]));
-a.download=`words_${new Date().toISOString().slice(0,10)}.csv`;
-a.click();
+  let csv="English,Hebrew,Hidden,Date Created\n";
+  words.forEach(w=>{
+    csv+=`"${w.e}","${w.h}",${w.hidden},"${w.created}"\n`;
+  });
+  let a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv]));
+  a.download=`words_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
 }
 
-function resetDB(){
-if(confirm("Delete all words?")){
-words=[]; save();
+function loadCSV(){
+  let input=document.createElement('input');
+  input.type='file';
+  input.accept='.csv';
+  input.onchange=e=>{
+    let file=e.target.files[0];
+    let reader=new FileReader();
+    reader.onload=()=>{
+      let lines=reader.result.split('\n');
+      let skipped=0;
+      lines.slice(1).forEach(l=>{
+        let parts=l.split(',');
+        if(parts.length<2) return;
+        let e=parts[0].replace(/"/g,'').trim();
+        let h=parts[1].replace(/"/g,'').trim();
+        if(words.find(w=>w.e===e)) { skipped++; return; }
+        words.push({e,h,hidden:false,shown:false,created:new Date().toISOString()});
+      });
+      save();
+      if(skipped) alert(`${skipped} duplicate words were skipped`);
+    };
+    reader.readAsText(file);
+  };
+  input.click();
 }
+
+function resetDatabase(){
+  if(confirm("Delete ALL words?")){
+    words=[];
+    save();
+  }
 }
 </script>
 
