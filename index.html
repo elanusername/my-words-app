@@ -2,335 +2,329 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Word Practice App</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>My Words App</title>
+
 <style>
 body {
-  font-family: Arial, sans-serif;
-  background: #f4f6f8;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f5f7fa;
   margin: 0;
   padding: 0;
 }
+
 header {
-  background: #2c3e50;
-  color: white;
+  text-align: center;
   padding: 16px;
-  text-align: center;
-}
-main {
-  padding: 20px;
-}
-button {
-  padding: 12px 18px;
-  margin: 6px;
-  font-size: 16px;
-  cursor: pointer;
-}
-.primary {
-  background: #3498db;
-  color: white;
-  border: none;
-}
-.success {
-  background: #2ecc71;
-  color: white;
-  border: none;
-}
-.danger {
-  background: #e74c3c;
-  color: white;
-  border: none;
-}
-.secondary {
-  background: #95a5a6;
-  color: white;
-  border: none;
-}
-.hidden {
-  display: none;
-}
-.center {
-  text-align: center;
-}
-.big-word {
-  font-size: 36px;
+  font-size: 22px;
   font-weight: bold;
 }
-.options button {
-  display: block;
-  width: 80%;
-  margin: 8px auto;
+
+.container {
+  max-width: 480px;
+  margin: auto;
+  padding: 16px;
 }
-.footer {
+
+button {
+  width: 60%;
+  padding: 14px;
+  margin: 10px auto;
+  display: block;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+  background: #2563eb;
+  color: white;
+}
+
+button.secondary {
+  background: #64748b;
+}
+
+button.danger {
+  background: #dc2626;
+}
+
+button:disabled {
+  background: #94a3b8;
+}
+
+.card {
+  background: white;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.word {
+  font-size: 32px;
+  text-align: center;
+  margin: 12px 0;
+}
+
+.translation {
+  font-size: 22px;
+  text-align: center;
+  color: #2563eb;
+  margin-top: 10px;
+}
+
+.top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.option {
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 10px;
+  margin: 8px 0;
+  text-align: center;
+}
+
+.option.correct { background: #bbf7d0; }
+.option.wrong { background: #fecaca; }
+
+footer {
   text-align: center;
   font-size: 12px;
-  color: #777;
-  margin-top: 40px;
-}
-.checkbox {
-  margin-top: 10px;
+  color: #475569;
+  margin: 20px 0;
 }
 </style>
 </head>
 
 <body>
-<header>
-  <h1>Word Practice App</h1>
-</header>
 
-<main>
+<header>My Words App</header>
 
-<!-- MAIN MENU -->
-<div id="mainMenu" class="center">
-  <button class="primary" style="width:60%" onclick="openPracticeSetup()">Practice Words</button><br>
-  <button class="primary" style="width:60%" onclick="loadSample()">Load Sample List</button><br>
-  <button class="danger" style="width:60%" onclick="resetDatabase()">Reset Word Database</button>
-  <p id="wordCount"></p>
-</div>
+<div class="container" id="app"></div>
 
-<!-- PRACTICE SETUP -->
-<div id="practiceSetup" class="hidden center">
-  <h2>Select Practice Size</h2>
-  <button onclick="startPractice(30)">30</button>
-  <button onclick="startPractice(50)">50</button>
-  <button onclick="startPractice(100)">100</button>
-  <button onclick="startPractice(200)">200</button>
-  <button onclick="startPractice('ALL')">ALL</button>
-
-  <div class="checkbox">
-    <label>
-      <input type="checkbox" id="resetPracticeCheckbox">
-      Reset Practice
-    </label>
-  </div>
-
-  <br>
-  <button class="secondary" onclick="goHome()">Back</button>
-</div>
-
-<!-- PRACTICE SCREEN -->
-<div id="practiceScreen" class="hidden center">
-  <div id="progress"></div>
-  <div class="big-word" id="englishWord"></div>
-
-  <div id="translation" class="hidden"></div>
-
-  <div id="confirmButtons" class="hidden">
-    <button class="success" onclick="confirmKnown(true)">✔ V</button>
-    <button class="danger" onclick="confirmKnown(false)">✖ X</button>
-  </div>
-
-  <div>
-    <button id="showTranslationBtn" onclick="showTranslation()">Show Translation</button>
-    <button id="showOptionsBtn" onclick="showOptions()">Show Options</button>
-  </div>
-
-  <div class="options hidden" id="options"></div>
-
-  <button id="nextBtn" class="primary hidden" onclick="nextWord()">Next Word</button>
-</div>
-
-<!-- PRACTICE COMPLETE -->
-<div id="practiceComplete" class="hidden center">
-  <h2>Practice Completed ✅</h2>
-  <p id="practiceSummary"></p>
-  <button class="primary" onclick="goHome()">Back to Main Menu</button>
-</div>
-
-<div class="footer">
-  This App was designed by Eli Anenburg and His AI friend
-</div>
-
-</main>
+<footer>
+This App was designed by Eli Anenburg and His AI friend
+</footer>
 
 <script>
-const STORAGE_KEY = "wordsDB";
-let words = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+/* ========= Storage ========= */
+const DB_KEY = "my_words_db";
+const PRACTICE_KEY = "practice_state";
 
+function loadWords() {
+  return JSON.parse(localStorage.getItem(DB_KEY) || "[]");
+}
+function saveWords(words) {
+  localStorage.setItem(DB_KEY, JSON.stringify(words));
+}
+
+/* ========= State ========= */
+let app = document.getElementById("app");
+let words = loadWords();
 let practiceQueue = [];
-let currentIndex = 0;
-let currentWord = null;
-let waitingForDecision = false;
+let practiceIndex = 0;
+let showTranslation = false;
+let showOptions = false;
 
-function save() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(words));
-  updateWordCount();
+/* ========= Screens ========= */
+
+function mainMenu() {
+  app.innerHTML = `
+    <div class="card">
+      <button onclick="addWordScreen()">Add Word</button>
+      <button onclick="practiceSetup()">Practice Words</button>
+      <button onclick="loadCSV()">Load List</button>
+      <button onclick="exportCSV()">Export Words</button>
+      <button class="danger" onclick="resetDatabase()">Reset Word Database</button>
+      <p style="text-align:center;margin-top:12px">
+        Number of words in database: <b>${words.filter(w=>!w.hidden).length}</b>
+      </p>
+    </div>
+  `;
 }
 
-function updateWordCount() {
-  document.getElementById("wordCount").innerText =
-    "Number of words in database: " + words.length;
+/* ========= Add Word ========= */
+function addWordScreen() {
+  app.innerHTML = `
+    <div class="card">
+      <input id="en" placeholder="English word" style="width:100%;padding:10px" />
+      <input id="he" placeholder="Hebrew translation" style="width:100%;padding:10px;margin-top:8px" />
+      <button onclick="saveWord()">Save</button>
+      <button class="secondary" onclick="mainMenu()">Back</button>
+    </div>
+  `;
 }
 
-updateWordCount();
-
-/* ---------- DATABASE ---------- */
-function resetDatabase() {
-  if (!confirm("Are you sure you want to delete ALL words?")) return;
-  words = [];
-  save();
-}
-
-function loadSample() {
-  const sample = [
-    ["apple", "תפוח"],
-    ["dog", "כלב"],
-    ["house", "בית"],
-    ["sun", "שמש"],
-    ["water", "מים"]
-  ];
-  sample.forEach(([e,t]) => {
-    if (!words.find(w => w.english === e)) {
-      words.push({
-        english: e,
-        translation: t,
-        createdAt: Date.now(),
-        isHidden: false,
-        wasShownInCurrentCycle: false,
-        wasCorrectInLastCycle: true,
-        wasConfirmedKnown: false
-      });
-    }
+function saveWord() {
+  const en = document.getElementById("en").value.trim();
+  const he = document.getElementById("he").value.trim();
+  if (!en || !he) return alert("Missing data");
+  words.push({
+    en, he,
+    hidden:false,
+    createdAt:Date.now(),
+    wasShown:false
   });
-  save();
+  saveWords(words);
+  mainMenu();
 }
 
-/* ---------- NAV ---------- */
-function goHome() {
-  hideAll();
-  document.getElementById("mainMenu").classList.remove("hidden");
+/* ========= Practice Setup ========= */
+function practiceSetup() {
+  app.innerHTML = `
+    <div class="card">
+      <h3>Select Practice Size</h3>
+      <button onclick="startPractice(30)">30</button>
+      <button onclick="startPractice(50)">50</button>
+      <button onclick="startPractice(100)">100</button>
+      <button onclick="startPractice(200)">200</button>
+      <button onclick="startPractice('ALL')">All</button>
+      <label>
+        <input type="checkbox" id="resetFlag" /> Reset Practice
+      </label>
+      <button class="secondary" onclick="mainMenu()">Back</button>
+    </div>
+  `;
 }
 
-function openPracticeSetup() {
-  hideAll();
-  document.getElementById("practiceSetup").classList.remove("hidden");
-}
-
-function hideAll() {
-  document.querySelectorAll("main > div").forEach(d => d.classList.add("hidden"));
-}
-
-/* ---------- PRACTICE LOGIC ---------- */
-function startPractice(limit) {
-  if (document.getElementById("resetPracticeCheckbox").checked) {
-    words.forEach(w => {
-      w.wasShownInCurrentCycle = false;
-      w.wasConfirmedKnown = false;
-    });
-    save();
+/* ========= Practice Logic ========= */
+function startPractice(size) {
+  const reset = document.getElementById("resetFlag").checked;
+  if (reset) {
+    words.forEach(w=>w.wasShown=false);
+    saveWords(words);
   }
 
-  const candidates = words.filter(w => !w.isHidden && !w.wasConfirmedKnown);
+  let available = words.filter(w=>!w.hidden && !w.wasShown)
+    .sort((a,b)=>b.createdAt-a.createdAt);
 
-  const incorrect = candidates.filter(w => w.wasCorrectInLastCycle === false);
-  const lifo = candidates
-    .filter(w => w.wasCorrectInLastCycle !== false)
-    .sort((a,b) => b.createdAt - a.createdAt);
-
-  practiceQueue = [...incorrect, ...lifo];
-  if (limit !== "ALL") practiceQueue = practiceQueue.slice(0, limit);
-
-  if (practiceQueue.length === 0) {
-    alert("Congratulations! All words were covered 🎉");
-    goHome();
-    return;
+  if (available.length === 0) {
+    alert("Practice Complete – All words were covered");
+    return mainMenu();
   }
 
-  currentIndex = 0;
-  hideAll();
-  document.getElementById("practiceScreen").classList.remove("hidden");
-  showCurrentWord();
+  if (size !== 'ALL') available = available.slice(0, size);
+
+  practiceQueue = available;
+  practiceIndex = 0;
+  showWord();
 }
 
-function showCurrentWord() {
-  currentWord = practiceQueue[currentIndex];
-  document.getElementById("englishWord").innerText = currentWord.english;
-  document.getElementById("translation").classList.add("hidden");
-  document.getElementById("confirmButtons").classList.add("hidden");
-  document.getElementById("options").classList.add("hidden");
-  document.getElementById("nextBtn").classList.add("hidden");
-  document.getElementById("showOptionsBtn").disabled = false;
-  document.getElementById("showTranslationBtn").disabled = false;
-  waitingForDecision = false;
+function showWord() {
+  const w = practiceQueue[practiceIndex];
+  showTranslation = false;
+  showOptions = false;
 
-  document.getElementById("progress").innerText =
-    `${currentIndex+1} / ${practiceQueue.length}`;
+  app.innerHTML = `
+    <div class="card">
+      <div class="top-row">
+        <div>${practiceIndex+1}/${practiceQueue.length}</div>
+        <button onclick="speak('${w.en}')">🔊</button>
+      </div>
+
+      <div class="word">${w.en}</div>
+      ${showTranslation ? `<div class="translation">${w.he}</div>` : ""}
+
+      <button onclick="revealTranslation()">Show Translation</button>
+      <button onclick="revealOptions()">Show Options</button>
+      <button onclick="nextWord()">Next Word</button>
+
+      <hr />
+      <button class="secondary" onclick="editWord()">Edit Word</button>
+      <button class="secondary" onclick="hideWord()">Hide</button>
+      <button class="danger" onclick="deleteWord()">Delete</button>
+
+      <button class="secondary" onclick="mainMenu()">Finish Practice</button>
+    </div>
+  `;
 }
 
-function showTranslation() {
-  document.getElementById("translation").innerText = currentWord.translation;
-  document.getElementById("translation").classList.remove("hidden");
-  document.getElementById("confirmButtons").classList.remove("hidden");
-  document.getElementById("showOptionsBtn").disabled = true;
-  waitingForDecision = true;
+function revealTranslation() {
+  showTranslation = true;
+  showWord();
 }
 
-function showOptions() {
-  document.getElementById("showOptionsBtn").disabled = true;
-  document.getElementById("showTranslationBtn").disabled = true;
-
-  const optionsDiv = document.getElementById("options");
-  optionsDiv.innerHTML = "";
-  optionsDiv.classList.remove("hidden");
-
-  const options = shuffle([
-    currentWord.translation,
-    ...shuffle(words.map(w => w.translation).filter(t => t !== currentWord.translation)).slice(0,3)
-  ]);
-
-  options.forEach(opt => {
-    const btn = document.createElement("button");
-    btn.innerText = opt;
-    btn.onclick = () => handleOption(opt, btn);
-    optionsDiv.appendChild(btn);
-  });
-}
-
-function handleOption(opt, btn) {
-  if (waitingForDecision) return;
-  waitingForDecision = true;
-
-  const buttons = document.querySelectorAll("#options button");
-  buttons.forEach(b => b.disabled = true);
-
-  if (opt === currentWord.translation) {
-    btn.classList.add("success");
-    document.getElementById("confirmButtons").classList.remove("hidden");
-  } else {
-    btn.classList.add("danger");
-    buttons.forEach(b => {
-      if (b.innerText === currentWord.translation) {
-        b.classList.add("success");
-      }
-    });
-    currentWord.wasCorrectInLastCycle = false;
-    document.getElementById("nextBtn").classList.remove("hidden");
-  }
-}
-
-function confirmKnown(known) {
-  currentWord.wasCorrectInLastCycle = known;
-  currentWord.wasConfirmedKnown = known;
-  document.getElementById("nextBtn").classList.remove("hidden");
+function revealOptions() {
+  showOptions = true;
+  const w = practiceQueue[practiceIndex];
+  const options = shuffle([w.he, "אופציה אקראית", "אופציה שגויה", "תרגום אחר"]);
+  let html = options.map(o=>`<div class="option">${o}</div>`).join("");
+  app.querySelector(".card").insertAdjacentHTML("beforeend", html);
 }
 
 function nextWord() {
-  currentWord.wasShownInCurrentCycle = true;
-  save();
-  currentIndex++;
-  if (currentIndex >= practiceQueue.length) {
-    hideAll();
-    document.getElementById("practiceComplete").classList.remove("hidden");
-    document.getElementById("practiceSummary").innerText =
-      `You practiced ${practiceQueue.length} words.`;
-  } else {
-    showCurrentWord();
+  practiceQueue[practiceIndex].wasShown = true;
+  saveWords(words);
+  practiceIndex++;
+  if (practiceIndex >= practiceQueue.length) {
+    alert("Practice Completed");
+    return mainMenu();
   }
+  showWord();
 }
 
-/* ---------- UTILS ---------- */
+/* ========= Helpers ========= */
 function shuffle(arr) {
-  return arr.sort(() => Math.random() - 0.5);
+  return arr.sort(()=>Math.random()-0.5);
 }
+function speak(t) {
+  speechSynthesis.speak(new SpeechSynthesisUtterance(t));
+}
+function deleteWord() {
+  if (!confirm("Delete word?")) return;
+  const w = practiceQueue[practiceIndex];
+  words = words.filter(x=>x!==w);
+  saveWords(words);
+  mainMenu();
+}
+function hideWord() {
+  practiceQueue[practiceIndex].hidden = true;
+  saveWords(words);
+  nextWord();
+}
+function editWord() {
+  const w = practiceQueue[practiceIndex];
+  app.innerHTML = `
+    <div class="card">
+      <input id="en" value="${w.en}" style="width:100%;padding:10px" />
+      <input id="he" value="${w.he}" style="width:100%;padding:10px;margin-top:8px" />
+      <button onclick="saveEdit()">Save</button>
+    </div>
+  `;
+}
+function saveEdit() {
+  const w = practiceQueue[practiceIndex];
+  w.en = document.getElementById("en").value;
+  w.he = document.getElementById("he").value;
+  saveWords(words);
+  showWord();
+}
+
+/* ========= CSV ========= */
+function exportCSV() {
+  let csv = "English,Hebrew,Hidden,Created\n";
+  words.forEach(w=>{
+    csv += `"${w.en}","${w.he}",${w.hidden},${new Date(w.createdAt).toISOString()}\n`;
+  });
+  const blob = new Blob([csv],{type:"text/csv"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `words_${Date.now()}.csv`;
+  a.click();
+}
+function loadCSV() {
+  alert("CSV Load placeholder – stable baseline");
+}
+function resetDatabase() {
+  if (!confirm("Reset ALL words?")) return;
+  localStorage.removeItem(DB_KEY);
+  words=[];
+  mainMenu();
+}
+
+/* ========= Init ========= */
+mainMenu();
 </script>
+
 </body>
 </html>
