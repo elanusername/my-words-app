@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>My Words App - Optimized</title>
+<title>My Words App - Final Local Version</title>
 
 <style>
 :root {
@@ -70,7 +70,6 @@ button:active { transform: scale(0.96); }
 .word-top { display: flex; justify-content: space-between; align-items: flex-start; }
 .word-actions { display: flex; gap: 5px; margin-top: 8px; justify-content: flex-end; }
 
-/* Action Icons */
 .action-btn { 
     padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; 
     border: 1px solid #e2e8f0; background: #fff; color: #94a3b8;
@@ -79,7 +78,7 @@ button:active { transform: scale(0.96); }
 .action-btn.active-success { background: #dcfce7; color: #15803d; border-color: #86efac; }
 .action-btn.active-hidden { background: #fef3c7; color: #92400e; border-color: #fde68a; }
 
-/* Practice UI Fix for iPhone 14 */
+/* Practice UI for iPhone 14 */
 .action-grid { display: flex; gap: 10px; justify-content: center; width: 100%; }
 .action-grid button { flex: 1; min-width: 0; padding: 12px 5px; font-size: 13px; }
 
@@ -87,9 +86,12 @@ button:active { transform: scale(0.96); }
 .translation { font-size: 22px; text-align: center; color: var(--primary); min-height: 1.5em; font-weight: 500;}
 
 .options .option { padding: 12px; border-radius: 10px; background: #f1f5f9; margin: 8px 0; cursor: pointer; text-align: center; font-size: 15px; }
+.option.correct { background: #dcfce7; border: 1px solid #22c55e; }
+.option.wrong { background: #fee2e2; border: 1px solid #ef4444; }
 
-/* Filter Chips */
-.filter-bar { display: flex; gap: 6px; margin-bottom: 15px; overflow-x: auto; padding: 4px 0; -webkit-overflow-scrolling: touch; }
+.vx-buttons { display: flex; gap: 10px; justify-content: center; margin-bottom: 15px; }
+
+.filter-bar { display: flex; gap: 6px; margin-bottom: 15px; overflow-x: auto; padding: 4px 0; }
 .filter-chip { 
     padding: 6px 12px; border-radius: 20px; font-size: 11px; background: #e2e8f0; 
     color: #475569; cursor: pointer; white-space: nowrap; border: 1.5px solid transparent;
@@ -124,7 +126,7 @@ button:active { transform: scale(0.96); }
         <h3>Database</h3>
         <button class="secondary" onclick="go('main')" style="padding: 5px 12px;">Back</button>
     </div>
-    <input type="text" id="dbSearch" class="search-input" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd; margin-bottom:10px;" placeholder="Search..." oninput="renderManageList()">
+    <input type="text" id="dbSearch" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd; margin-bottom:10px; box-sizing:border-box;" placeholder="Search..." oninput="renderManageList()">
     <div class="filter-bar">
         <div class="filter-chip active" onclick="setFilter('all', this)">All</div>
         <div class="filter-chip" data-f="failed" onclick="setFilter('failed', this)">Failed</div>
@@ -137,8 +139,8 @@ button:active { transform: scale(0.96); }
 <div class="screen" id="add">
     <h1>Add Word</h1>
     <div class="card">
-        <input id="eng" placeholder="English Word" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #ddd;">
-        <input id="heb" placeholder="Hebrew Translation" style="width:100%; padding:12px; margin-bottom:15px; border-radius:8px; border:1px solid #ddd;">
+        <input id="eng" placeholder="English Word" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #ddd; box-sizing:border-box;">
+        <input id="heb" placeholder="Hebrew Translation" style="width:100%; padding:12px; margin-bottom:15px; border-radius:8px; border:1px solid #ddd; box-sizing:border-box;">
         <button class="primary" style="width:100%" onclick="saveWord()">Save Word</button>
         <button class="secondary" style="width:100%; margin-top:10px" onclick="go('main')">Cancel</button>
     </div>
@@ -147,12 +149,12 @@ button:active { transform: scale(0.96); }
 <div class="screen" id="practiceSetup">
     <h1>Setup</h1>
     <div class="card">
-        <label>Mode:</label>
-        <select id="mode" style="width:100%; padding:10px; margin-bottom:15px;"><option value="recent">Recent (LIFO)</option><option value="all">Random</option></select>
-        <label>Count:</label>
-        <select id="limit" style="width:100%; padding:10px; margin-bottom:15px;"><option value="30">30</option><option value="50">50</option><option value="100">100</option><option value="9999">ALL</option></select>
-        <label style="display:flex; align-items: center; font-size: 14px;"><input type="checkbox" id="resetProgress" style="margin-right:10px;"> Reset Session</label>
-        <button class="primary" style="width:100%; margin-top:20px;" onclick="startPractice()">Start</button>
+        <label style="display:block; margin-bottom:5px; font-weight:bold;">Mode:</label>
+        <select id="mode" style="width:100%; padding:10px; margin-bottom:15px; border-radius:8px;"><option value="recent">Recent (LIFO)</option><option value="all">Random</option></select>
+        <label style="display:block; margin-bottom:5px; font-weight:bold;">Count:</label>
+        <select id="limit" style="width:100%; padding:10px; margin-bottom:15px; border-radius:8px;"><option value="30">30</option><option value="50">50</option><option value="100">100</option><option value="9999">ALL</option></select>
+        <label style="display:flex; align-items: center; font-size: 14px; cursor:pointer;"><input type="checkbox" id="resetProgress" style="margin-right:10px;"> Reset Progress (All Words)</label>
+        <button class="primary" style="width:100%; margin-top:20px;" onclick="startPractice()">Start Session</button>
     </div>
 </div>
 
@@ -167,7 +169,7 @@ button:active { transform: scale(0.96); }
         <div class="translation" id="translation"></div>
         <div id="options" class="options"></div>
 
-        <div class="vx-buttons" id="vxButtons" style="display:none; gap:10px; justify-content:center;">
+        <div class="vx-buttons" id="vxButtons" style="display:none;">
             <button class="primary" style="background:#16a34a; flex:1;" onclick="markV()">Correct V</button>
             <button class="danger" style="flex:1;" onclick="markX()">Failed X</button>
         </div>
@@ -179,11 +181,14 @@ button:active { transform: scale(0.96); }
         </div>
 
         <hr style="margin: 20px 0; border: 0; border-top: 1px solid #f1f5f9;">
-        <div class="action-grid" style="gap:5px;">
+        
+        <div class="action-grid" style="gap:5px; margin-bottom:15px;">
             <button class="secondary" style="font-size:11px;" onclick="editWord()">Edit</button>
             <button class="secondary" style="font-size:11px;" onclick="hideWord()">Hide</button>
             <button class="danger" style="font-size:11px; background:#fca5a5" onclick="deleteWordPractice()">Delete</button>
         </div>
+
+        <button class="secondary" style="width:100%; margin-top:10px; font-size: 13px; border: 1px dashed #cbd5e1;" onclick="finishPractice()">🏁 Finish Practice & Save</button>
     </div>
 </div>
 
@@ -243,11 +248,6 @@ function saveWord(){
     save(); eng.value=heb.value=""; go('main');
 }
 
-    function finishPractice() { 
-    save(); // שומר את כל מה שתרגלת עד עכשיו לזיכרון
-    go('main'); // מחזיר אותך למסך הראשי
-}
-    
 // PRACTICE ENGINE
 function startPractice() {
     let limit = parseInt(document.getElementById('limit').value);
@@ -299,10 +299,20 @@ function prepareConfirm() {
     document.getElementById('vxButtons').style.display = 'flex';
 }
 
-function markV() { let m = words.find(w => w.e === practiceQueue[index].e); if(m){m.failed=false; m.shown=true;} score++; finishStep(); }
-function markX() { let m = words.find(w => w.e === practiceQueue[index].e); if(m){m.failed=true; m.shown=false;} finishStep(); }
+function markV() { 
+    let m = words.find(w => w.e === practiceQueue[index].e); 
+    if(m){m.failed=false; m.shown=true;} 
+    score++; 
+    finishStep(); 
+}
+function markX() { 
+    let m = words.find(w => w.e === practiceQueue[index].e); 
+    if(m){m.failed=true; m.shown=false;} 
+    finishStep(); 
+}
 function finishStep() { document.getElementById('vxButtons').style.display = 'none'; document.getElementById('nextBtn').style.display = 'block'; }
 function nextWord() { index++; if(index >= practiceQueue.length) { save(); alert(`Done! ${score}/${practiceQueue.length}`); go('main'); } else loadWord(); }
+function finishPractice() { save(); go('main'); }
 
 // UTILS
 function speakWord() { let u = new SpeechSynthesisUtterance(practiceQueue[index].e); u.lang = 'en-US'; speechSynthesis.speak(u); }
@@ -328,6 +338,7 @@ function resetDatabase() { if(confirm("Clear All?")) { words=[]; save(); locatio
 function hideWord(){ let m = words.find(w => w.e === practiceQueue[index].e); if(m) m.hidden = true; save(); nextWord(); }
 function deleteWordPractice(){ if(confirm("Delete?")) { words = words.filter(w => w.e !== practiceQueue[index].e); save(); practiceQueue.splice(index,1); if(index >= practiceQueue.length) go('main'); else loadWord(); } }
 function editWord(){ let w = practiceQueue[index]; let ne = prompt("Eng", w.e), nh = prompt("Heb", w.h); if(ne && nh) { let m = words.find(x => x.e === w.e); if(m) { m.e=ne; m.h=nh; } w.e=ne; w.h=nh; save(); loadWord(); } }
+
 document.getElementById('count').innerText = words.length;
 </script>
 </body>
