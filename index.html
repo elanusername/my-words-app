@@ -243,6 +243,11 @@ function saveWord(){
     save(); eng.value=heb.value=""; go('main');
 }
 
+    function finishPractice() { 
+    save(); // שומר את כל מה שתרגלת עד עכשיו לזיכרון
+    go('main'); // מחזיר אותך למסך הראשי
+}
+    
 // PRACTICE ENGINE
 function startPractice() {
     let limit = parseInt(document.getElementById('limit').value);
