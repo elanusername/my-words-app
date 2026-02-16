@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>My Word Practice ver 1.6</title>
+    <title>My Word Practice ver 1.6.1</title>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -83,7 +83,7 @@
                 Sign in with Google
             </button>
             <div id="error-display" style="color: red; font-size: 0.8rem; margin-top: 10px;"></div>
-            <div class="version-tag">ver 1.6</div>
+            <div class="version-tag">ver 1.6.1</div>
         </div>
 
         <div id="main-screen" class="hidden">
@@ -172,7 +172,7 @@
         function handleLoginClick() {
             const provider = new firebase.auth.GoogleAuthProvider();
             provider.setCustomParameters({ prompt: 'select_account' });
-            auth.signInWithRedirect(provider);
+            auth.signInWithPopup(provider);
         }
 
         function logout() {
