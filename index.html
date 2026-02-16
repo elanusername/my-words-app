@@ -68,6 +68,12 @@
         }
         .btn-google:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 
+        .version-tag {
+            margin-top: 30px;
+            font-size: 0.7rem;
+            color: #bbb;
+        }
+
         /* Header Layout */
         .header-container {
             display: flex;
@@ -124,6 +130,7 @@
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18">
                 Sign in with Google
             </button>
+            <div class="version-tag">ver 1.1</div>
         </div>
 
         <div id="main-screen" class="hidden">
@@ -184,21 +191,13 @@
         const db = firebase.firestore();
         const auth = firebase.auth();
 
-        let words = [];
-        let practiceSession = [];
-        let currentIndex = 0;
-        let isMCMode = false;
-
-        // טיפול בכפתור לוגין
-        document.getElementById('google-login-btn').addEventListener('click', () => {
+        // האזנה אקטיבית ללחצן הלוגין
+        document.getElementById('google-login-btn').onclick = function() {
             const provider = new firebase.auth.GoogleAuthProvider();
             auth.signInWithRedirect(provider);
-        });
+        };
 
-        // בדיקה אם חזרנו מ-Redirect
-        auth.getRedirectResult().catch(e => console.error("Auth error:", e));
-
-        // מעקב אחרי מצב משתמש
+        // ניהול מצבי מסכים
         auth.onAuthStateChanged(user => {
             if (user) {
                 showScreen('main-screen');
@@ -209,24 +208,34 @@
             }
         });
 
+        // בדיקה אם חזרנו מהתחברות
+        auth.getRedirectResult().catch(e => console.error("Redirect Result Error:", e));
+
         function logout() { auth.signOut(); }
+
+        let words = [];
+        let practiceSession = [];
+        let currentIndex = 0;
+        let isMCMode = false;
 
         function loadWords(uid) {
             db.collection('users').doc(uid).collection('words').orderBy('timestamp', 'desc')
                 .onSnapshot(snapshot => {
                     words = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     document.getElementById('word-count').innerText = words.length;
+                    document.getElementById('start-practice-btn').disabled = (words.length === 0);
                 });
         }
 
         async function syncLocalToCloud(uid) {
             const local = JSON.parse(localStorage.getItem('words') || '[]');
             if (local.length > 0) {
-                for (const w of local) {
-                    await db.collection('users').doc(uid).collection('words').add({
-                        ...w, timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                }
+                const batch = db.batch();
+                local.forEach(w => {
+                    const newRef = db.collection('users').doc(uid).collection('words').doc();
+                    batch.set(newRef, { ...w, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+                });
+                await batch.commit();
                 localStorage.removeItem('words');
             }
         }
@@ -255,10 +264,15 @@
             const item = practiceSession[currentIndex];
             document.getElementById('current-word-text').innerText = item.word;
             document.getElementById('current-translation-text').innerText = '';
+            
+            const dateDiv = document.getElementById('word-date');
             if (item.timestamp) {
                 const date = item.timestamp.toDate ? item.timestamp.toDate() : new Date(item.timestamp);
-                document.getElementById('word-date').innerText = `Added on: ${date.toLocaleDateString()}`;
+                dateDiv.innerText = `Added on: ${date.toLocaleDateString()}`;
+            } else {
+                dateDiv.innerText = '';
             }
+
             if (isMCMode) setupMC();
             else document.getElementById('mc-options').classList.add('hidden');
         }
@@ -289,7 +303,8 @@
 
         async function deleteCurrentWord() {
             if (!confirm("Delete this word?")) return;
-            await db.collection('users').doc(auth.currentUser.uid).collection('words').doc(practiceSession[currentIndex].id).delete();
+            const wordId = practiceSession[currentIndex].id;
+            await db.collection('users').doc(auth.currentUser.uid).collection('words').doc(wordId).delete();
             practiceSession.splice(currentIndex, 1);
             if (practiceSession.length === 0) showScreen('main-screen');
             else showWord();
