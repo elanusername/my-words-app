@@ -14,7 +14,6 @@
             --text: #333;
             --danger: #e74c3c;
             --success: #2ecc71;
-            --google-blue: #4285F4;
         }
 
         body {
@@ -41,7 +40,7 @@
 
         .hidden { display: none !important; }
 
-        /* Login Screen - New Design */
+        /* Login Screen */
         #login-screen {
             display: flex;
             flex-direction: column;
@@ -49,40 +48,27 @@
             padding: 1rem 0;
         }
 
-        #login-screen h2 {
-            color: var(--primary);
-            margin-bottom: 0.5rem;
-            font-size: 1.8rem;
-        }
-
-        #login-screen p {
-            color: #666;
-            margin-bottom: 2rem;
-            font-weight: 500;
-        }
+        #login-screen h2 { color: var(--primary); margin-bottom: 0.5rem; font-size: 1.6rem; }
+        #login-screen p { color: #666; margin-bottom: 2rem; font-weight: 500; }
 
         .btn-google {
             background-color: white;
             color: #757575;
             border: 1px solid #ddd;
-            padding: 0 15px;
-            border-radius: 4px;
+            padding: 0 20px;
+            border-radius: 8px;
             font-size: 16px;
             font-weight: 500;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 15px;
             cursor: pointer;
             height: 50px;
             transition: box-shadow 0.3s;
-            margin: 0 auto; /* מרכוז */
         }
+        .btn-google:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 
-        .btn-google:hover {
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-
-        /* Header & Layout */
+        /* Header Layout */
         .header-container {
             display: flex;
             align-items: center;
@@ -95,10 +81,9 @@
 
         .btn-logout {
             position: absolute;
-            right: -10px;
-            top: -10px;
-            background: #f8d7da;
-            color: #721c24;
+            right: 0;
+            background: #fceaea;
+            color: #c0392b;
             border: none;
             padding: 6px 12px;
             border-radius: 8px;
@@ -107,66 +92,25 @@
             font-weight: bold;
         }
 
-        /* Shared Components */
-        button {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s;
-            font-size: 1rem;
-        }
-
+        /* Buttons & Inputs */
+        button { padding: 12px 24px; border: none; border-radius: 12px; cursor: pointer; font-weight: 600; transition: all 0.2s; font-size: 1rem; }
         .btn-primary { background-color: var(--primary); color: white; width: 100%; margin: 10px 0; }
         .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
-        .btn-back { background-color: #6c757d; color: white; margin-top: 15px; }
+        .btn-back { background-color: #6c757d; color: white; width: 100%; margin-top: 15px; }
         .btn-danger { background-color: var(--danger); color: white; }
 
-        /* Practice Area */
-        .word-card { 
-            margin: 1.5rem 0; 
-            font-size: 2.2rem; 
-            font-weight: 800; 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-        }
-        
-        .translation { 
-            color: var(--primary); 
-            font-size: 1.5rem;
-            margin-bottom: 1.5rem; 
-            min-height: 40px; 
-            font-weight: 600;
-        }
-
+        .word-card { margin: 1.5rem 0; font-size: 2.2rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 15px; }
+        .translation { color: var(--primary); font-size: 1.5rem; margin-bottom: 1.5rem; min-height: 40px; font-weight: 600; }
         .date-label { font-size: 0.85rem; color: #aaa; margin-bottom: 10px; }
 
         .controls { display: flex; justify-content: center; gap: 25px; margin-top: 25px; }
         .btn-action { width: 65px; height: 65px; border-radius: 50%; font-size: 1.8rem; display: flex; align-items: center; justify-content: center; }
 
-        input {
-            width: 100%;
-            padding: 14px;
-            margin: 12px 0;
-            border: 2px solid #eee;
-            border-radius: 10px;
-            box-sizing: border-box;
-            font-size: 1rem;
-        }
+        input { width: 100%; padding: 14px; margin: 12px 0; border: 2px solid #eee; border-radius: 10px; box-sizing: border-box; font-size: 1rem; }
+        .speaker-btn { background: none; border: none; font-size: 1.8rem; cursor: pointer; color: var(--primary); }
 
-        input:focus { border-color: var(--primary); outline: none; }
-
-        .speaker-btn {
-            background: none;
-            border: none;
-            font-size: 1.8rem;
-            cursor: pointer;
-            color: var(--primary);
-            padding: 0;
-        }
+        #mc-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+        .mc-btn { width: 100%; background: #f8f9fa; border: 1px solid #ddd; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 500; }
     </style>
 </head>
 <body>
@@ -184,10 +128,10 @@
 
         <div id="main-screen" class="hidden">
             <div class="header-container">
-                <button class="btn-logout" onclick="logout()">Logout</button>
                 <h1 style="margin:0;">My Words</h1>
+                <button class="btn-logout" onclick="logout()">Logout</button>
             </div>
-            <p style="font-size: 1.1rem;">Words in list: <strong id="word-count">0</strong></p>
+            <p>Words in list: <strong id="word-count">0</strong></p>
             <button class="btn-primary" onclick="showScreen('setup-screen')">Add New Words</button>
             <button class="btn-primary" id="start-practice-btn" onclick="startPractice()" style="background-color: var(--success);">Start Practice</button>
         </div>
@@ -201,33 +145,31 @@
         </div>
 
         <div id="practice-screen" class="hidden">
-            <div id="practice-content">
-                <div class="date-label" id="word-date"></div>
-                <div class="word-card">
-                    <button class="speaker-btn" onclick="speakWord()">🔊</button>
-                    <span id="current-word-text"></span>
-                </div>
-                <div class="translation" id="current-translation-text"></div>
-                
-                <div id="mc-options" class="hidden" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;"></div>
+            <div class="date-label" id="word-date"></div>
+            <div class="word-card">
+                <button class="speaker-btn" onclick="speakWord()">🔊</button>
+                <span id="current-word-text"></span>
+            </div>
+            <div class="translation" id="current-translation-text"></div>
+            
+            <div id="mc-options" class="hidden"></div>
 
-                <div class="controls">
-                    <button class="btn-action btn-danger" onclick="handleX()">✘</button>
-                    <button class="btn-action" style="background-color: #f1f1f1; color: var(--text);" onclick="showTranslation()">?</button>
-                    <button class="btn-action" style="background-color: var(--success); color: white;" onclick="handleV()">✔</button>
-                </div>
-                
-                <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
-                    <button class="btn-primary" onclick="toggleMC()" id="mc-toggle-btn" style="background-color: #6c5ce7;">Multi Choice</button>
-                    <button class="btn-danger" onclick="deleteCurrentWord()" style="width: 100%; margin-top: 10px; background-color: #ff7675;">Delete Word</button>
-                    <button class="btn-back" onclick="showScreen('main-screen')" style="width: 100%;">Stop</button>
-                </div>
+            <div class="controls">
+                <button class="btn-action btn-danger" onclick="handleX()">✘</button>
+                <button class="btn-action" style="background: #eee;" onclick="showTranslation()">?</button>
+                <button class="btn-action" style="background: var(--success); color: white;" onclick="handleV()">✔</button>
+            </div>
+            
+            <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
+                <button class="btn-primary" onclick="toggleMC()" id="mc-toggle-btn" style="background: #6c5ce7;">Multi Choice</button>
+                <button class="btn-danger" onclick="deleteCurrentWord()" style="width:100%; margin-top:10px;">Delete Word</button>
+                <button class="btn-back" onclick="showScreen('main-screen')">Stop</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- CONFIGURATION (הכנס את הפרטים שלך כאן) ---
+        // --- הכנס כאן את ה-Config שלך מה-Firebase Console ---
         const firebaseConfig = {
 			apiKey: "AIzaSyCt0aC_gPhtyi3OkBwGiMZgo8A3CKcoBQc",
 			authDomain: "my-words-app-anen.firebaseapp.com",
@@ -247,10 +189,16 @@
         let currentIndex = 0;
         let isMCMode = false;
 
-        // --- AUTH LOGIC ---
-        // האזנה לכפתור הלוגין בצורה מפורשת
-        document.getElementById('google-login-btn').addEventListener('click', login);
+        // טיפול בכפתור לוגין
+        document.getElementById('google-login-btn').addEventListener('click', () => {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithRedirect(provider);
+        });
 
+        // בדיקה אם חזרנו מ-Redirect
+        auth.getRedirectResult().catch(e => console.error("Auth error:", e));
+
+        // מעקב אחרי מצב משתמש
         auth.onAuthStateChanged(user => {
             if (user) {
                 showScreen('main-screen');
@@ -261,66 +209,42 @@
             }
         });
 
-        async function login() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            try { 
-                await auth.signInWithPopup(provider); 
-            } catch (e) { 
-                console.error(e);
-                alert("Login failed: " + e.message); 
-            }
-        }
-
         function logout() { auth.signOut(); }
-
-        // --- DATA LOGIC ---
-        async function syncLocalToCloud(uid) {
-            const local = JSON.parse(localStorage.getItem('words') || '[]');
-            if (local.length > 0) {
-                const batch = db.batch();
-                local.forEach(w => {
-                    const newDoc = db.collection('users').doc(uid).collection('words').doc();
-                    batch.set(newDoc, { ...w, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
-                });
-                await batch.commit();
-                localStorage.removeItem('words');
-            }
-        }
 
         function loadWords(uid) {
             db.collection('users').doc(uid).collection('words').orderBy('timestamp', 'desc')
                 .onSnapshot(snapshot => {
                     words = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     document.getElementById('word-count').innerText = words.length;
-                    document.getElementById('start-practice-btn').disabled = words.length === 0;
                 });
+        }
+
+        async function syncLocalToCloud(uid) {
+            const local = JSON.parse(localStorage.getItem('words') || '[]');
+            if (local.length > 0) {
+                for (const w of local) {
+                    await db.collection('users').doc(uid).collection('words').add({
+                        ...w, timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+                localStorage.removeItem('words');
+            }
         }
 
         async function addWord() {
             const word = document.getElementById('word-input').value.trim();
             const translation = document.getElementById('translation-input').value.trim();
             if (!word || !translation) return;
-
             await db.collection('users').doc(auth.currentUser.uid).collection('words').add({
                 word, translation, timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
-
             document.getElementById('word-input').value = '';
             document.getElementById('translation-input').value = '';
             showScreen('main-screen');
         }
 
-        async function deleteCurrentWord() {
-            if (!confirm("Are you sure?")) return;
-            const wordId = practiceSession[currentIndex].id;
-            await db.collection('users').doc(auth.currentUser.uid).collection('words').doc(wordId).delete();
-            practiceSession.splice(currentIndex, 1);
-            if (practiceSession.length === 0) showScreen('main-screen');
-            else showWord();
-        }
-
-        // --- PRACTICE LOGIC ---
         function startPractice() {
+            if (words.length === 0) return;
             practiceSession = [...words].sort(() => Math.random() - 0.5);
             currentIndex = 0;
             showScreen('practice-screen');
@@ -328,18 +252,13 @@
         }
 
         function showWord() {
-            if (!practiceSession[currentIndex]) return;
             const item = practiceSession[currentIndex];
             document.getElementById('current-word-text').innerText = item.word;
             document.getElementById('current-translation-text').innerText = '';
-            
             if (item.timestamp) {
                 const date = item.timestamp.toDate ? item.timestamp.toDate() : new Date(item.timestamp);
                 document.getElementById('word-date').innerText = `Added on: ${date.toLocaleDateString()}`;
-            } else {
-                document.getElementById('word-date').innerText = '';
             }
-
             if (isMCMode) setupMC();
             else document.getElementById('mc-options').classList.add('hidden');
         }
@@ -351,11 +270,9 @@
         function handleV() {
             currentIndex++;
             if (currentIndex >= practiceSession.length) {
-                alert("Great job! Session finished.");
+                alert("Session Finished!");
                 showScreen('main-screen');
-            } else {
-                showWord();
-            }
+            } else { showWord(); }
         }
 
         function handleX() {
@@ -365,15 +282,22 @@
         }
 
         function speakWord() {
-            const word = practiceSession[currentIndex].word;
-            const msg = new SpeechSynthesisUtterance(word);
+            const msg = new SpeechSynthesisUtterance(practiceSession[currentIndex].word);
             msg.lang = 'en-US';
             window.speechSynthesis.speak(msg);
         }
 
+        async function deleteCurrentWord() {
+            if (!confirm("Delete this word?")) return;
+            await db.collection('users').doc(auth.currentUser.uid).collection('words').doc(practiceSession[currentIndex].id).delete();
+            practiceSession.splice(currentIndex, 1);
+            if (practiceSession.length === 0) showScreen('main-screen');
+            else showWord();
+        }
+
         function toggleMC() {
             isMCMode = !isMCMode;
-            document.getElementById('mc-toggle-btn').innerText = isMCMode ? "Switch to Normal" : "Multi Choice";
+            document.getElementById('mc-toggle-btn').innerText = isMCMode ? "Normal Mode" : "Multi Choice";
             showWord();
         }
 
@@ -382,38 +306,21 @@
             const div = document.getElementById('mc-options');
             div.innerHTML = '';
             div.classList.remove('hidden');
-
-            let options = [correct.translation];
-            let others = words.filter(w => w.id !== correct.id);
-            others.sort(() => Math.random() - 0.5);
-            options.push(...others.slice(0, 3).map(o => o.translation));
-            options.sort(() => Math.random() - 0.5);
-
-            options.forEach(opt => {
+            let opts = [correct.translation, ...words.filter(w => w.id !== correct.id).sort(() => Math.random() - 0.5).slice(0, 3).map(w => w.translation)].sort(() => Math.random() - 0.5);
+            opts.forEach(opt => {
                 const btn = document.createElement('button');
-                btn.style.width = "100%";
-                btn.style.backgroundColor = "#f8f9fa";
-                btn.style.border = "1px solid #ddd";
-                btn.style.color = "#333";
-                btn.style.padding = "10px";
-                btn.style.borderRadius = "8px";
+                btn.className = 'mc-btn';
                 btn.innerText = opt;
                 btn.onclick = () => {
-                    if (opt === correct.translation) {
-                        btn.style.backgroundColor = 'var(--success)';
-                        btn.style.color = 'white';
-                        setTimeout(handleV, 500);
-                    } else {
-                        btn.style.backgroundColor = 'var(--danger)';
-                        btn.style.color = 'white';
-                    }
+                    if (opt === correct.translation) { btn.style.background = 'var(--success)'; btn.style.color = 'white'; setTimeout(handleV, 500); }
+                    else { btn.style.background = 'var(--danger)'; btn.style.color = 'white'; }
                 };
                 div.appendChild(btn);
             });
         }
 
         function showScreen(id) {
-            document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
+            document.querySelectorAll('.container > div').forEach(d => d.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
         }
     </script>
