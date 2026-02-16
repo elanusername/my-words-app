@@ -10,106 +10,39 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/8.10.1/firebase-firestore.js"></script>
 
     <style>
-        :root {
-            --primary: #4a90e2;
-            --secondary: #f5f7fa;
-            --text: #333;
-            --danger: #e74c3c;
-            --success: #2ecc71;
-        }
-
+        :root { --primary: #4a90e2; --secondary: #f5f7fa; --text: #333; --danger: #e74c3c; --success: #2ecc71; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 15px; /* מונע מהריבוע לגעת בקצוות המסך */
-        }
-
-        .container {
-            background: white;
-            padding: 2rem 1.2rem;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            width: 100%; /* גמיש לחלוטין */
-            max-width: 380px; /* רוחב אידיאלי לטלפון */
-            text-align: center;
-        }
-
+        body { font-family: -apple-system, system-ui, sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 15px; }
+        .container { background: white; padding: 2rem 1.2rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 380px; text-align: center; }
         .hidden { display: none !important; }
-
-        /* Login Screen */
-        #login-screen h2 { color: var(--primary); font-size: 1.4rem; margin-top: 10px; }
-        
-        .btn-google {
-            background-color: white;
-            color: #555;
-            border: 1px solid #ddd;
-            padding: 0 15px;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            height: 50px;
-            margin: 20px 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-
+        .btn-google { background: white; color: #555; border: 1px solid #ddd; padding: 0 15px; border-radius: 10px; font-size: 16px; font-weight: 600; display: inline-flex; align-items: center; gap: 10px; cursor: pointer; height: 50px; margin: 20px 0; }
+        .btn-primary { background: var(--primary); color: white; width: 100%; padding: 14px; margin: 8px 0; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; font-size: 1rem; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; }
         .version-tag { margin-top: 20px; font-size: 0.7rem; color: #ccc; }
-
-        /* Header */
-        .header-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
-        }
-
+        .header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 10px; border-bottom: 1px solid #eee; }
         .btn-logout { background: #fee; color: #c33; padding: 5px 10px; border-radius: 8px; font-size: 0.8rem; border: none; }
-
-        /* General Styles */
-        button { border: none; border-radius: 12px; cursor: pointer; font-weight: 600; transition: 0.2s; }
-        .btn-primary { background-color: var(--primary); color: white; width: 100%; padding: 14px; margin: 8px 0; font-size: 1rem; }
-        input { 
-            width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; 
-            -webkit-appearance: none; /* תיקון לאייפון */
-        }
-
         .word-card { margin: 1.5rem 0; font-size: 2rem; font-weight: 800; }
         .controls { display: flex; justify-content: center; gap: 20px; }
-        .btn-action { width: 65px; height: 65px; border-radius: 50%; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; }
-
-        @media (max-width: 350px) {
-            .container { padding: 1rem; }
-            .word-card { font-size: 1.6rem; }
-        }
+        .btn-action { width: 65px; height: 65px; border-radius: 50%; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <div id="login-screen">
+        <div id="loading-screen">
+            <p>Checking authentication...</p>
+        </div>
+
+        <div id="login-screen" class="hidden">
             <div style="font-size: 3rem;">📖</div>
             <h2>Login to Practice Words App</h2>
             <p style="color:#666; font-size: 0.9rem;">all words in ONE place</p>
-            
             <button class="btn-google" onclick="handleLoginClick()">
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18">
                 Sign in with Google
             </button>
-            
             <div id="error-display" style="color: red; font-size: 0.8rem; margin-top: 10px;"></div>
-            <div class="version-tag">ver 1.3</div>
+            <div class="version-tag">ver 1.4</div>
         </div>
 
         <div id="main-screen" class="hidden">
@@ -137,15 +70,12 @@
                 <span id="current-word-text"></span>
             </div>
             <div id="current-translation-text" style="color:var(--primary); font-size:1.2rem; min-height:30px; margin-bottom:15px; font-weight:600;"></div>
-            
             <div id="mc-options" class="hidden" style="display:flex; flex-direction:column; gap:8px; margin-bottom:15px;"></div>
-
             <div class="controls">
                 <button class="btn-action" style="background:#fceaea; color:#c0392b;" onclick="handleX()">✘</button>
                 <button class="btn-action" style="background:#eee;" onclick="showTranslation()">?</button>
                 <button class="btn-action" style="background:var(--success); color:white;" onclick="handleV()">✔</button>
             </div>
-            
             <div style="margin-top: 25px; border-top: 1px solid #eee; padding-top: 15px;">
                 <button class="btn-primary" onclick="toggleMC()" id="mc-toggle-btn" style="background:#6c5ce7;">Multi Choice</button>
                 <button class="btn-primary" style="background:#ff7675;" onclick="deleteCurrentWord()">Delete Word</button>
@@ -155,7 +85,6 @@
     </div>
 
     <script>
-        // --- הכנס כאן את ה-Config שלך ---
         const firebaseConfig = {
 			apiKey: "AIzaSyCt0aC_gPhtyi3OkBwGiMZgo8A3CKcoBQc",
 			authDomain: "my-words-app-anen.firebaseapp.com",
@@ -166,36 +95,50 @@
 			measurementId: "G-1E3BLH585J"
         };
 
-        var db, auth;
+        let db, auth;
 
-        // ניסיון אתחול זהיר
         try {
-            if (typeof firebase !== 'undefined') {
-                firebase.initializeApp(firebaseConfig);
-                db = firebase.firestore();
-                auth = firebase.auth();
-                
-                auth.onAuthStateChanged(user => {
-                    if (user) {
-                        showScreen('main-screen');
-                        loadWords(user.uid);
-                    } else {
-                        showScreen('login-screen');
-                    }
-                });
-            } else {
-                throw new Error("Firebase library not loaded. Check your internet or ad-blocker.");
-            }
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            auth = firebase.auth();
+
+            // 1. טיפול בחזרה מה-Redirect
+            auth.getRedirectResult().then((result) => {
+                if (result.user) {
+                    console.log("User logged in via redirect:", result.user.email);
+                    showScreen('main-screen');
+                }
+            }).catch((error) => {
+                console.error("Redirect Result Error:", error);
+                document.getElementById('error-display').innerText = error.message;
+            });
+
+            // 2. מאזין קבוע למצב המשתמש
+            auth.onAuthStateChanged(user => {
+                document.getElementById('loading-screen').classList.add('hidden');
+                if (user) {
+                    showScreen('main-screen');
+                    loadWords(user.uid);
+                } else {
+                    showScreen('login-screen');
+                }
+            });
+
         } catch (e) {
-            document.getElementById('error-display').innerText = "Error: " + e.message;
+            document.getElementById('error-display').innerText = "Init Error: " + e.message;
         }
 
         function handleLoginClick() {
             const provider = new firebase.auth.GoogleAuthProvider();
+            // שימוש ב-Redirect (הכי בטוח לניידים)
             auth.signInWithRedirect(provider);
         }
 
-        function logout() { auth.signOut(); }
+        function logout() { 
+            auth.signOut().then(() => {
+                showScreen('login-screen');
+            });
+        }
 
         let words = [];
         let practiceSession = [];
@@ -245,10 +188,8 @@
 
         function handleV() {
             currentIndex++;
-            if (currentIndex >= practiceSession.length) {
-                alert("Finished!");
-                showScreen('main-screen');
-            } else showWord();
+            if (currentIndex >= practiceSession.length) { alert("Finished!"); showScreen('main-screen'); }
+            else showWord();
         }
 
         function handleX() {
