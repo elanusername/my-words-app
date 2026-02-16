@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>My Word Practice</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth-compat.js"></script>
@@ -16,6 +16,8 @@
             --success: #2ecc71;
         }
 
+        * { box-sizing: border-box; } /* מונע מהריבוע לחרוג מהמסך */
+
         body {
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
@@ -25,15 +27,16 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            padding: 10px; /* רווח קטן מהקצוות בטלפון */
         }
 
         .container {
             background: white;
-            padding: 2.5rem;
+            padding: 2rem 1.5rem;
             border-radius: 20px;
             box-shadow: 0 15px 35px rgba(0,0,0,0.15);
-            width: 90%;
-            max-width: 450px;
+            width: 100%; /* תופס את כל הרווח הזמין */
+            max-width: 400px; /* אבל לא יותר מ-400 פיקסלים */
             text-align: center;
             position: relative;
         }
@@ -45,44 +48,35 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 1rem 0;
         }
 
-        #login-screen h2 { color: var(--primary); margin-bottom: 0.5rem; font-size: 1.6rem; }
-        #login-screen p { color: #666; margin-bottom: 2rem; font-weight: 500; }
-
+        #login-screen h2 { color: var(--primary); margin-bottom: 0.5rem; font-size: 1.5rem; }
+        
         .btn-google {
             background-color: white;
             color: #757575;
             border: 1px solid #ddd;
-            padding: 0 20px;
+            padding: 0 15px;
             border-radius: 8px;
             font-size: 16px;
-            font-weight: 500;
+            font-weight: 600;
             display: inline-flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
             cursor: pointer;
             height: 50px;
-            transition: box-shadow 0.3s;
+            margin: 20px 0;
         }
-        .btn-google:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 
-        .version-tag {
-            margin-top: 30px;
-            font-size: 0.7rem;
-            color: #bbb;
-        }
+        .version-tag { margin-top: 20px; font-size: 0.7rem; color: #ccc; }
 
         /* Header Layout */
         .header-container {
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             position: relative;
-            margin-bottom: 2rem;
-            padding-bottom: 10px;
-            border-bottom: 2px solid var(--secondary);
+            margin-bottom: 1.5rem;
         }
 
         .btn-logout {
@@ -90,52 +84,54 @@
             right: 0;
             background: #fceaea;
             color: #c0392b;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 0.7rem;
             border: none;
-            padding: 6px 12px;
-            border-radius: 8px;
             cursor: pointer;
-            font-size: 0.75rem;
-            font-weight: bold;
         }
 
-        /* Buttons & Inputs */
-        button { padding: 12px 24px; border: none; border-radius: 12px; cursor: pointer; font-weight: 600; transition: all 0.2s; font-size: 1rem; }
-        .btn-primary { background-color: var(--primary); color: white; width: 100%; margin: 10px 0; }
-        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
-        .btn-back { background-color: #6c757d; color: white; width: 100%; margin-top: 15px; }
-        .btn-danger { background-color: var(--danger); color: white; }
+        /* Forms & Buttons */
+        button { border: none; border-radius: 12px; cursor: pointer; font-weight: 600; transition: 0.2s; }
+        .btn-primary { background-color: var(--primary); color: white; width: 100%; padding: 12px; margin: 8px 0; font-size: 1rem; }
+        .btn-back { background-color: #6c757d; color: white; width: 100%; padding: 10px; margin-top: 10px; }
+        
+        input { 
+            width: 100%; 
+            padding: 12px; 
+            margin: 8px 0; 
+            border: 2px solid #eee; 
+            border-radius: 10px; 
+            font-size: 1rem;
+            -webkit-appearance: none; /* תיקון לאייפון */
+        }
 
-        .word-card { margin: 1.5rem 0; font-size: 2.2rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 15px; }
-        .translation { color: var(--primary); font-size: 1.5rem; margin-bottom: 1.5rem; min-height: 40px; font-weight: 600; }
-        .date-label { font-size: 0.85rem; color: #aaa; margin-bottom: 10px; }
+        .word-card { margin: 1.5rem 0; font-size: 2rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .date-label { font-size: 0.8rem; color: #bbb; }
+        .controls { display: flex; justify-content: center; gap: 20px; margin-top: 20px; }
+        .btn-action { width: 60px; height: 60px; border-radius: 50%; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; }
 
-        .controls { display: flex; justify-content: center; gap: 25px; margin-top: 25px; }
-        .btn-action { width: 65px; height: 65px; border-radius: 50%; font-size: 1.8rem; display: flex; align-items: center; justify-content: center; }
-
-        input { width: 100%; padding: 14px; margin: 12px 0; border: 2px solid #eee; border-radius: 10px; box-sizing: border-box; font-size: 1rem; }
-        .speaker-btn { background: none; border: none; font-size: 1.8rem; cursor: pointer; color: var(--primary); }
-
-        #mc-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
-        .mc-btn { width: 100%; background: #f8f9fa; border: 1px solid #ddd; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 500; }
     </style>
 </head>
 <body>
 
     <div class="container">
         <div id="login-screen">
-            <div style="font-size: 4rem; margin-bottom: 1rem;">📚</div>
+            <div style="font-size: 3.5rem; margin-bottom: 0.5rem;">📚</div>
             <h2>Login to Practice Words App</h2>
-            <p>all words in ONE place</p>
-            <button class="btn-google" id="google-login-btn">
+            <p style="margin:0; color:#666;">all words in ONE place</p>
+            
+            <button class="btn-google" onclick="handleLoginClick()">
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18">
                 Sign in with Google
             </button>
-            <div class="version-tag">ver 1.1</div>
+            
+            <div class="version-tag">ver 1.2</div>
         </div>
 
         <div id="main-screen" class="hidden">
             <div class="header-container">
-                <h1 style="margin:0;">My Words</h1>
+                <h1 style="margin:0; font-size: 1.5rem;">My Words</h1>
                 <button class="btn-logout" onclick="logout()">Logout</button>
             </div>
             <p>Words in list: <strong id="word-count">0</strong></p>
@@ -148,35 +144,35 @@
             <input type="text" id="word-input" placeholder="Word (English)">
             <input type="text" id="translation-input" placeholder="Translation (Hebrew)">
             <button class="btn-primary" onclick="addWord()">Save Word</button>
-            <button class="btn-back" onclick="showScreen('main-screen')">Back to Menu</button>
+            <button class="btn-back" onclick="showScreen('main-screen')">Back</button>
         </div>
 
         <div id="practice-screen" class="hidden">
             <div class="date-label" id="word-date"></div>
             <div class="word-card">
-                <button class="speaker-btn" onclick="speakWord()">🔊</button>
+                <button style="background:none; font-size:1.5rem;" onclick="speakWord()">🔊</button>
                 <span id="current-word-text"></span>
             </div>
-            <div class="translation" id="current-translation-text"></div>
+            <div id="current-translation-text" style="color:var(--primary); font-size:1.3rem; min-height:30px; margin-bottom:10px;"></div>
             
-            <div id="mc-options" class="hidden"></div>
+            <div id="mc-options" class="hidden" style="display:flex; flex-direction:column; gap:8px; margin-bottom:15px;"></div>
 
             <div class="controls">
-                <button class="btn-action btn-danger" onclick="handleX()">✘</button>
-                <button class="btn-action" style="background: #eee;" onclick="showTranslation()">?</button>
-                <button class="btn-action" style="background: var(--success); color: white;" onclick="handleV()">✔</button>
+                <button class="btn-action" style="background:#fceaea; color:#c0392b;" onclick="handleX()">✘</button>
+                <button class="btn-action" style="background:#eee;" onclick="showTranslation()">?</button>
+                <button class="btn-action" style="background:var(--success); color:white;" onclick="handleV()">✔</button>
             </div>
             
-            <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
-                <button class="btn-primary" onclick="toggleMC()" id="mc-toggle-btn" style="background: #6c5ce7;">Multi Choice</button>
-                <button class="btn-danger" onclick="deleteCurrentWord()" style="width:100%; margin-top:10px;">Delete Word</button>
+            <div style="margin-top: 25px; border-top: 1px solid #eee; padding-top: 15px;">
+                <button class="btn-primary" onclick="toggleMC()" id="mc-toggle-btn" style="background:#6c5ce7;">Multi Choice</button>
+                <button class="btn-primary" style="background:#ff7675;" onclick="deleteCurrentWord()">Delete Word</button>
                 <button class="btn-back" onclick="showScreen('main-screen')">Stop</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- הכנס כאן את ה-Config שלך מה-Firebase Console ---
+        // --- הכנס כאן את ה-Config שלך ---
         const firebaseConfig = {
 			apiKey: "AIzaSyCt0aC_gPhtyi3OkBwGiMZgo8A3CKcoBQc",
 			authDomain: "my-words-app-anen.firebaseapp.com",
@@ -187,17 +183,25 @@
 			measurementId: "G-1E3BLH585J"
         };
 
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const auth = firebase.auth();
+        // אתחול בסיסי
+        try {
+            firebase.initializeApp(firebaseConfig);
+            var db = firebase.firestore();
+            var auth = firebase.auth();
+        } catch (e) {
+            alert("Firebase Init Error: " + e.message);
+        }
 
-        // האזנה אקטיבית ללחצן הלוגין
-        document.getElementById('google-login-btn').onclick = function() {
+        // פונקציית לוגין עם Alert לבדיקה
+        function handleLoginClick() {
+            console.log("Login button clicked");
             const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithRedirect(provider);
-        };
+            auth.signInWithRedirect(provider).catch(err => {
+                alert("Login Error: " + err.message);
+            });
+        }
 
-        // ניהול מצבי מסכים
+        // מאזין למצב משתמש
         auth.onAuthStateChanged(user => {
             if (user) {
                 showScreen('main-screen');
@@ -208,7 +212,6 @@
             }
         });
 
-        // בדיקה אם חזרנו מהתחברות
         auth.getRedirectResult().catch(e => console.error("Redirect Result Error:", e));
 
         function logout() { auth.signOut(); }
@@ -223,7 +226,8 @@
                 .onSnapshot(snapshot => {
                     words = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     document.getElementById('word-count').innerText = words.length;
-                    document.getElementById('start-practice-btn').disabled = (words.length === 0);
+                }, err => {
+                    console.error("Firestore error:", err);
                 });
         }
 
@@ -232,8 +236,8 @@
             if (local.length > 0) {
                 const batch = db.batch();
                 local.forEach(w => {
-                    const newRef = db.collection('users').doc(uid).collection('words').doc();
-                    batch.set(newRef, { ...w, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+                    const ref = db.collection('users').doc(uid).collection('words').doc();
+                    batch.set(ref, { ...w, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
                 });
                 await batch.commit();
                 localStorage.removeItem('words');
@@ -241,11 +245,11 @@
         }
 
         async function addWord() {
-            const word = document.getElementById('word-input').value.trim();
-            const translation = document.getElementById('translation-input').value.trim();
-            if (!word || !translation) return;
+            const w = document.getElementById('word-input').value.trim();
+            const t = document.getElementById('translation-input').value.trim();
+            if (!w || !t) return;
             await db.collection('users').doc(auth.currentUser.uid).collection('words').add({
-                word, translation, timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                word: w, translation: t, timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
             document.getElementById('word-input').value = '';
             document.getElementById('translation-input').value = '';
@@ -264,15 +268,10 @@
             const item = practiceSession[currentIndex];
             document.getElementById('current-word-text').innerText = item.word;
             document.getElementById('current-translation-text').innerText = '';
-            
-            const dateDiv = document.getElementById('word-date');
             if (item.timestamp) {
-                const date = item.timestamp.toDate ? item.timestamp.toDate() : new Date(item.timestamp);
-                dateDiv.innerText = `Added on: ${date.toLocaleDateString()}`;
-            } else {
-                dateDiv.innerText = '';
+                const d = item.timestamp.toDate ? item.timestamp.toDate() : new Date(item.timestamp);
+                document.getElementById('word-date').innerText = `Added on: ${d.toLocaleDateString()}`;
             }
-
             if (isMCMode) setupMC();
             else document.getElementById('mc-options').classList.add('hidden');
         }
@@ -284,14 +283,14 @@
         function handleV() {
             currentIndex++;
             if (currentIndex >= practiceSession.length) {
-                alert("Session Finished!");
+                alert("Finished!");
                 showScreen('main-screen');
-            } else { showWord(); }
+            } else showWord();
         }
 
         function handleX() {
-            const current = practiceSession.splice(currentIndex, 1)[0];
-            practiceSession.push(current);
+            const curr = practiceSession.splice(currentIndex, 1)[0];
+            practiceSession.push(curr);
             showWord();
         }
 
@@ -302,9 +301,8 @@
         }
 
         async function deleteCurrentWord() {
-            if (!confirm("Delete this word?")) return;
-            const wordId = practiceSession[currentIndex].id;
-            await db.collection('users').doc(auth.currentUser.uid).collection('words').doc(wordId).delete();
+            if (!confirm("Delete?")) return;
+            await db.collection('users').doc(auth.currentUser.uid).collection('words').doc(practiceSession[currentIndex].id).delete();
             practiceSession.splice(currentIndex, 1);
             if (practiceSession.length === 0) showScreen('main-screen');
             else showWord();
@@ -323,14 +321,14 @@
             div.classList.remove('hidden');
             let opts = [correct.translation, ...words.filter(w => w.id !== correct.id).sort(() => Math.random() - 0.5).slice(0, 3).map(w => w.translation)].sort(() => Math.random() - 0.5);
             opts.forEach(opt => {
-                const btn = document.createElement('button');
-                btn.className = 'mc-btn';
-                btn.innerText = opt;
-                btn.onclick = () => {
-                    if (opt === correct.translation) { btn.style.background = 'var(--success)'; btn.style.color = 'white'; setTimeout(handleV, 500); }
-                    else { btn.style.background = 'var(--danger)'; btn.style.color = 'white'; }
+                const b = document.createElement('button');
+                b.style.cssText = "width:100%; background:#f8f9fa; border:1px solid #ddd; padding:10px; border-radius:8px; cursor:pointer;";
+                b.innerText = opt;
+                b.onclick = () => {
+                    if (opt === correct.translation) { b.style.background = 'var(--success)'; b.style.color='white'; setTimeout(handleV, 500); }
+                    else { b.style.background = 'var(--danger)'; b.style.color='white'; }
                 };
-                div.appendChild(btn);
+                div.appendChild(b);
             });
         }
 
