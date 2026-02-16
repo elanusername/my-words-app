@@ -3,86 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MyWords v1.8</title>
+    <title>MyWords v1.10</title>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <style>
-        :root { --primary: #4a90e2; --secondary: #f5f7fa; --danger: #e74c3c; --success: #2ecc71; }
+        :root {
+            --primary: #4a90e2;
+            --secondary: #f5f7fa;
+            --text: #333;
+            --danger: #e74c3c;
+            --success: #2ecc71;
+        }
+
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: #f0f2f5; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 15px; }
-        .container { background: white; padding: 2.5rem 1.5rem; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        .container {
+            background: white;
+            padding: 2.5rem 1.5rem;
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
         .hidden { display: none !important; }
+
+        /* Buttons */
         button { border: none; border-radius: 14px; cursor: pointer; font-weight: 600; transition: 0.2s; outline: none; }
         .btn-primary { background: var(--primary); color: white; width: 100%; padding: 16px; margin: 10px 0; font-size: 1.1rem; }
-        .btn-google { background: white; color: #555; border: 1px solid #ddd; padding: 12px; display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; margin-top: 20px; }
-        input { width: 100%; padding: 14px; margin: 10px 0; border: 2px solid #eee; border-radius: 12px; font-size: 16px; }
-        .word-card { margin: 2rem 0; font-size: 2.5rem; font-weight: 800; }
-        .controls { display: flex; justify-content: center; gap: 20px; }
-        .btn-action { width: 65px; height: 65px; border-radius: 50%; font-size: 1.5rem; color: white; display: flex; align-items: center; justify-content: center; }
+        .btn-google { 
+            background: white; color: #555; border: 1px solid #ddd; padding: 12px; 
+            display: inline-flex; align-items: center; gap: 12px; width: 100%; justify-content: center;
+            margin-top: 20px; font-size: 16px;
+        }
+        .btn-logout { background: #fee; color: #c33; padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; }
+        .btn-action { width: 70px; height: 70px; border-radius: 50%; font-size: 1.8rem; display: flex; align-items: center; justify-content: center; color: white; }
+
+        /* Inputs */
+        input { width: 100%; padding: 14px; margin: 10px 0; border: 2px solid #eee; border-radius: 12px; font-size: 16px; outline: none; }
+        input:focus { border-color: var(--primary); }
+
+        /* Practice UI */
+        .header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        .word-card { margin: 2rem 0; font-size: 2.5rem; font-weight: 800; color: var(--text); }
+        .controls { display: flex; justify-content: center; gap: 25px; margin-top: 25px; }
+        
+        .version-tag { margin-top: 25px; font-size: 0.75rem; color: #bbb; }
+        #loading-screen { font-size: 1.2rem; color: var(--primary); font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div class="container">
         <div id="loading-screen">
-            <div style="font-size: 3rem; margin-bottom: 10px;">⏳</div>
-            <p id="loading-text">Syncing with Google...</p>
+            <div style="font-size: 3rem; margin-bottom: 15px;">🔄</div>
+            <p>Authenticating...</p>
         </div>
 
         <div id="login-screen" class="hidden">
             <div style="font-size: 4rem;">📓</div>
-            <h1 style="color: var(--primary);">MyWords</h1>
-            <p>Master your vocabulary</p>
+            <h1 style="color: var(--primary); margin: 10px 0;">MyWords</h1>
+            <p style="color: #666;">Master your vocabulary</p>
             <button class="btn-google" onclick="handleLoginClick()">
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18">
                 Sign in with Google
             </button>
-            <div id="error-display" style="color: var(--danger); font-size: 0.8rem; margin-top: 15px;"></div>
-            <p style="font-size: 0.7rem; color: #ccc; margin-top: 20px;">ver 1.8</p>
+            <div id="error-display" style="color: var(--danger); font-size: 0.85rem; margin-top: 15px;"></div>
+            <div class="version-tag">ver 1.10 (Mobile Fix)</div>
         </div>
 
         <div id="main-screen" class="hidden">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <h2 style="margin:0;">Dashboard</h2>
-                <button style="background:#fee; color:#c33; padding:5px 10px; border-radius:8px;" onclick="logout()">Logout</button>
+            <div class="header-container">
+                <h2 style="margin:0; font-size: 1.5rem;">Dashboard</h2>
+                <button class="btn-logout" onclick="logout()">Logout</button>
             </div>
-            <div style="background:var(--secondary); padding:20px; border-radius:15px; margin-bottom:20px;">
-                <div id="word-count" style="font-size:2.5rem; font-weight:800; color:var(--primary);">0</div>
-                <span style="color:#666;">Words Stored</span>
+            <div style="background: var(--secondary); padding: 20px; border-radius: 18px; margin-bottom: 20px;">
+                <span style="font-size: 0.9rem; color: #666;">Total Words</span>
+                <div id="word-count" style="font-size: 2.8rem; font-weight: 800; color: var(--primary);">0</div>
             </div>
             <button class="btn-primary" onclick="showScreen('setup-screen')">Add New Word</button>
-            <button class="btn-primary" id="start-btn" onclick="startPractice()" style="background:var(--success);">Start Practice</button>
+            <button class="btn-primary" id="start-practice-btn" onclick="startPractice()" style="background-color: var(--success);">Start Practice</button>
         </div>
 
         <div id="setup-screen" class="hidden">
-            <h2>Add Word</h2>
-            <input type="text" id="word-input" placeholder="English">
-            <input type="text" id="translation-input" placeholder="Hebrew">
+            <h2 style="margin-bottom: 20px;">New Entry</h2>
+            <input type="text" id="word-input" placeholder="Word (English)">
+            <input type="text" id="translation-input" placeholder="Translation (Hebrew)">
             <button class="btn-primary" onclick="addWord()">Save Word</button>
-            <button class="btn-primary" style="background:#6c757d;" onclick="showScreen('main-screen')">Back</button>
+            <button class="btn-primary" style="background:#6c757d;" onclick="showScreen('main-screen')">Cancel</button>
         </div>
 
         <div id="practice-screen" class="hidden">
+            <div id="word-date" style="font-size:0.8rem; color:#aaa; margin-bottom: 10px;"></div>
             <div class="word-card">
                 <span id="current-word-text"></span>
-                <span onclick="speakWord()" style="cursor:pointer;">🔊</span>
+                <span onclick="speakWord()" style="cursor:pointer; font-size: 1.8rem; margin-left: 10px;">🔊</span>
             </div>
-            <div id="current-translation-text" style="color:var(--primary); font-size:1.5rem; min-height:40px; margin-bottom:20px; font-weight:600;"></div>
-            <div id="mc-options" class="hidden" style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;"></div>
+            
+            <div id="current-translation-text" style="color:var(--primary); font-size:1.5rem; min-height:45px; margin-bottom:20px; font-weight:600;"></div>
+            
+            <div id="mc-options" class="hidden" style="display:flex; flex-direction:column; gap:12px; margin-bottom:25px;"></div>
+
             <div class="controls">
                 <button class="btn-action" style="background:var(--danger);" onclick="handleX()">✘</button>
-                <button class="btn-action" style="background:#ddd; color:#333;" onclick="showTranslation()">?</button>
+                <button class="btn-action" style="background:#ddd; color: #333;" onclick="showTranslation()">?</button>
                 <button class="btn-action" style="background:var(--success);" onclick="handleV()">✔</button>
             </div>
-            <button class="btn-primary" onclick="toggleMC()" id="mc-toggle-btn" style="background:#6c5ce7; margin-top:30px;">Toggle MC</button>
-            <button class="btn-primary" style="background:#6c757d;" onclick="showScreen('main-screen')">Stop</button>
+            
+            <div style="margin-top: 35px; border-top: 1px solid #eee; padding-top: 25px;">
+                <button class="btn-primary" onclick="toggleMC()" id="mc-toggle-btn" style="background:#6c5ce7;">Multiple Choice</button>
+                <button class="btn-primary" style="background:var(--danger); opacity: 0.8;" onclick="deleteCurrentWord()">Delete Word</button>
+                <button class="btn-primary" style="background:#6c757d;" onclick="showScreen('main-screen')">Stop Session</button>
+            </div>
         </div>
     </div>
 
     <script>
+        // --- 1. CONFIGURATION ---
         const firebaseConfig = {
 			apiKey: "AIzaSyCt0aC_gPhtyi3OkBwGiMZgo8A3CKcoBQc",
 			authDomain: "my-words-app-anen.firebaseapp.com",
@@ -93,71 +145,92 @@
 			measurementId: "G-1E3BLH585J"
         };
 
+        // --- 2. INITIALIZATION ---
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
-
-        // חובה לאייפון: הגדרת התמדה (Persistence) לפני הכל
-        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-
-        // טיפול בתוצאה שחוזרת מגוגל
-        auth.getRedirectResult().then(result => {
-            if (result.user) {
-                console.log("Redirect success");
-                showScreen('main-screen');
-            }
-        }).catch(error => {
-            document.getElementById('error-display').innerText = "Mobile Link Error: " + error.message;
-        });
-
-        // מאזין למצב משתמש
-        auth.onAuthStateChanged(user => {
-            // השהיה קטנה כדי למנוע "קפיצה" של המסך בטעינה איטית בטלפון
-            setTimeout(() => {
-                document.getElementById('loading-screen').classList.add('hidden');
-                if (user) {
-                    showScreen('main-screen');
-                    loadWords(user.uid);
-                } else {
-                    showScreen('login-screen');
-                }
-            }, 1000);
-        });
-
-        function handleLoginClick() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            // בטלפון - תמיד Redirect. 
-            // חשוב: וודא שהדומיין שלך מופיע ב-Firebase Console תחת Authorized Domains!
-            auth.signInWithRedirect(provider);
-        }
-
-        function logout() { auth.signOut().then(() => location.reload()); }
 
         let words = [];
         let practiceSession = [];
         let currentIndex = 0;
         let isMCMode = false;
 
+        // Force Local Persistence for iOS Safari
+        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
+        // --- 3. AUTH LOGIC ---
+
+        // Check for Redirect Result (Crucial for Mobile)
+        async function checkRedirect() {
+            try {
+                const result = await auth.getRedirectResult();
+                if (result.user) {
+                    console.log("Redirect success:", result.user.email);
+                    showScreen('main-screen');
+                }
+            } catch (error) {
+                console.error("Redirect Result Error:", error);
+                document.getElementById('error-display').innerText = error.message;
+            }
+        }
+
+        checkRedirect();
+
+        // Listen for Auth State Changes
+        auth.onAuthStateChanged(user => {
+            // Delay closing the loading screen to allow Redirect Result to finish
+            setTimeout(() => {
+                const loading = document.getElementById('loading-screen');
+                if (loading) loading.classList.add('hidden');
+
+                if (user) {
+                    showScreen('main-screen');
+                    loadWords(user.uid);
+                } else {
+                    showScreen('login-screen');
+                }
+            }, 1500);
+        });
+
+        function handleLoginClick() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            provider.setCustomParameters({ 
+                prompt: 'select_account',
+                authuser: '0' 
+            });
+            // Redirect is better for mobile browsers than Popup
+            auth.signInWithRedirect(provider);
+        }
+
+        function logout() {
+            auth.signOut().then(() => location.reload());
+        }
+
+        // --- 4. DATA LOGIC ---
+
         function loadWords(uid) {
             db.collection('users').doc(uid).collection('words').orderBy('timestamp', 'desc')
                 .onSnapshot(snapshot => {
                     words = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     document.getElementById('word-count').innerText = words.length;
-                    document.getElementById('start-btn').disabled = (words.length === 0);
+                    document.getElementById('start-practice-btn').disabled = (words.length === 0);
                 });
         }
 
         async function addWord() {
-            const w = document.getElementById('word-input').value.trim();
-            const t = document.getElementById('translation-input').value.trim();
-            if (!w || !t) return;
+            const word = document.getElementById('word-input').value.trim();
+            const translation = document.getElementById('translation-input').value.trim();
+            if (!word || !translation) return;
+
             await db.collection('users').doc(auth.currentUser.uid).collection('words').add({
-                word: w, translation: t, timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                word, translation, timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
             document.getElementById('word-input').value = '';
             document.getElementById('translation-input').value = '';
             showScreen('main-screen');
         }
+
+        // --- 5. PRACTICE LOGIC ---
 
         function startPractice() {
             if (words.length === 0) return;
@@ -171,6 +244,12 @@
             const item = practiceSession[currentIndex];
             document.getElementById('current-word-text').innerText = item.word;
             document.getElementById('current-translation-text').innerText = '';
+            
+            if (item.timestamp) {
+                const date = item.timestamp.toDate ? item.timestamp.toDate() : new Date(item.timestamp);
+                document.getElementById('word-date').innerText = `Added: ${date.toLocaleDateString()}`;
+            }
+
             if (isMCMode) setupMC();
             else document.getElementById('mc-options').classList.add('hidden');
         }
@@ -181,8 +260,12 @@
 
         function handleV() {
             currentIndex++;
-            if (currentIndex >= practiceSession.length) { alert("Done!"); showScreen('main-screen'); }
-            else showWord();
+            if (currentIndex >= practiceSession.length) {
+                alert("Session Complete!");
+                showScreen('main-screen');
+            } else {
+                showWord();
+            }
         }
 
         function handleX() {
@@ -197,24 +280,46 @@
             window.speechSynthesis.speak(msg);
         }
 
+        async function deleteCurrentWord() {
+            if (!confirm("Delete this word?")) return;
+            const id = practiceSession[currentIndex].id;
+            await db.collection('users').doc(auth.currentUser.uid).collection('words').doc(id).delete();
+            practiceSession.splice(currentIndex, 1);
+            if (practiceSession.length === 0) showScreen('main-screen');
+            else showWord();
+        }
+
         function toggleMC() {
             isMCMode = !isMCMode;
-            document.getElementById('mc-toggle-btn').innerText = isMCMode ? "Standard" : "Multiple Choice";
+            document.getElementById('mc-toggle-btn').innerText = isMCMode ? "Standard Mode" : "Multiple Choice";
             showWord();
         }
 
         function setupMC() {
             const correct = practiceSession[currentIndex];
             const div = document.getElementById('mc-options');
-            div.innerHTML = ''; div.classList.remove('hidden');
-            let opts = [correct.translation, ...words.filter(w => w.id !== correct.id).sort(() => Math.random() - 0.5).slice(0, 3).map(w => w.translation)].sort(() => Math.random() - 0.5);
-            opts.forEach(opt => {
+            div.innerHTML = '';
+            div.classList.remove('hidden');
+
+            let options = [correct.translation];
+            let otherWords = words.filter(w => w.id !== correct.id).map(w => w.translation);
+            otherWords.sort(() => Math.random() - 0.5);
+            options.push(...otherWords.slice(0, 3));
+            options.sort(() => Math.random() - 0.5);
+
+            options.forEach(opt => {
                 const b = document.createElement('button');
-                b.style.cssText = "width:100%; background:#f8f9fa; border:2px solid #eee; padding:15px; border-radius:12px; margin-bottom:5px;";
+                b.style.cssText = "width:100%; background:#f8f9fa; border:2px solid #eee; padding:15px; border-radius:14px; cursor:pointer; font-size:1rem; margin-bottom: 5px;";
                 b.innerText = opt;
                 b.onclick = () => {
-                    if (opt === correct.translation) { b.style.background = 'var(--success)'; b.style.color='white'; setTimeout(handleV, 500); }
-                    else { b.style.background = 'var(--danger)'; b.style.color='white'; }
+                    if (opt === correct.translation) {
+                        b.style.background = 'var(--success)';
+                        b.style.color = 'white';
+                        setTimeout(handleV, 500);
+                    } else {
+                        b.style.background = 'var(--danger)';
+                        b.style.color = 'white';
+                    }
                 };
                 div.appendChild(b);
             });
@@ -222,7 +327,8 @@
 
         function showScreen(id) {
             document.querySelectorAll('.container > div').forEach(d => d.classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
+            const target = document.getElementById(id);
+            if (target) target.classList.remove('hidden');
         }
     </script>
 </body>
